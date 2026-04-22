@@ -1,0 +1,1285 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* === PREMIUM THEME VARIABLES === */
+    :root {
+        --sidebar-bg: rgba(17, 24, 39, 0.95);
+        --sidebar-text: #9CA3AF;
+        --brand-accent: #10B981;
+        --brand-dark: #059669;
+        --body-bg: #F3F4F6;
+        --text-dark: #1F2937;
+        --text-muted: #6B7280;
+        
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --glass-shadow: 0 15px 35px rgba(0, 0, 0, 0.03);
+        --border-color: #E5E7EB;
+    }
+
+    /* === DARK MODE THEME === */
+    [data-theme="dark"] {
+        --body-bg: #0f172a;
+        --text-dark: #f8fafc;
+        --text-muted: #94a3b8;
+        --glass-bg: rgba(30, 41, 59, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.05);
+        --glass-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        --border-color: #334155;
+    }
+
+    body { background-color: var(--body-bg); color: var(--text-dark); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow-x: hidden; position: relative; transition: background-color 0.3s, color 0.3s; }
+    .dashboard-wrapper { display: flex; min-height: 100vh; z-index: 1; position: relative; width: 100%; }
+
+    /* === DARK MODE BOOTSTRAP OVERRIDES === */
+    .text-dark { color: var(--text-dark) !important; }
+    .text-muted { color: var(--text-muted) !important; }
+
+    [data-theme="dark"] .bg-white { background-color: var(--glass-bg) !important; }
+    [data-theme="dark"] .bg-light { background-color: rgba(0, 0, 0, 0.2) !important; }
+    [data-theme="dark"] .btn-light { background-color: rgba(255, 255, 255, 0.1) !important; color: var(--text-dark) !important; border-color: var(--glass-border) !important; }
+    [data-theme="dark"] .btn-outline-dark { color: var(--text-dark) !important; border-color: var(--glass-border) !important; }
+    [data-theme="dark"] .btn-outline-dark:hover { background-color: var(--glass-bg) !important; color: var(--brand-accent) !important; }
+    [data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+    [data-theme="dark"] .list-group-item:hover { background-color: rgba(255, 255, 255, 0.05) !important; }
+    [data-theme="dark"] .border-light { border-color: var(--glass-border) !important; }
+
+    /* === LIVE AMBIENT BACKGROUND === */
+    .live-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; pointer-events: none; background: radial-gradient(circle at top left, transparent 0%, transparent 100%); }
+    [data-theme="dark"] .live-bg { background: radial-gradient(circle at top left, #0f172a 0%, #020617 100%); }
+    .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.6; animation: floatOrb 15s infinite alternate ease-in-out; }
+    .orb-1 { width: 500px; height: 500px; background: rgba(16, 185, 129, 0.25); top: -100px; left: -100px; }
+    .orb-2 { width: 600px; height: 600px; background: rgba(59, 130, 246, 0.2); bottom: -150px; right: -150px; animation-delay: -5s; animation-duration: 20s; }
+    .orb-3 { width: 400px; height: 400px; background: rgba(245, 158, 11, 0.15); top: 30%; left: 40%; animation-delay: -2s; animation-duration: 18s; }
+    @keyframes floatOrb { 0% { transform: translateY(0) translateX(0) scale(1); } 100% { transform: translateY(60px) translateX(60px) scale(1.15); } }
+
+    /* === SIDEBAR === */
+    .sidebar { width: 280px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 30px 20px; position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000; box-shadow: 5px 0 25px rgba(0,0,0,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .sidebar-profile { text-align: center; margin-bottom: 40px; }
+    .profile-img-wrap { width: 100px; height: 100px; margin: 0 auto 15px; padding: 4px; background: linear-gradient(135deg, var(--brand-accent), #3B82F6); border-radius: 50%; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+    .profile-initial { width: 100%; height: 100%; border-radius: 50%; background: #1F2937; color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; border: 3px solid var(--sidebar-bg); }
+    .profile-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--sidebar-bg); }
+    .profile-name { font-size: 1.25rem; font-weight: 800; margin-bottom: 2px; color: white; letter-spacing: -0.5px; }
+    .profile-handle { font-size: 0.85rem; color: var(--sidebar-text); font-weight: 500; }
+    .nav-links { list-style: none; padding: 0; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; margin: 0; }
+    .nav-item a { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-radius: 14px; color: var(--sidebar-text); text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; cursor: pointer; }
+    .nav-item a:hover { background-color: rgba(255,255,255,0.05); color: white; transform: translateX(5px); }
+    .nav-item a.active { background: linear-gradient(90deg, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0) 100%); color: var(--brand-accent); border-left: 4px solid var(--brand-accent); }
+    .nav-icon { width: 25px; margin-right: 10px; text-align: center; font-size: 1.1rem; }
+    .nav-badge { background: #F59E0B; color: white; font-size: 0.75rem; padding: 3px 10px; border-radius: 50px; font-weight: 800; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); }
+    .logout-btn { margin-top: 20px; border: 1px solid rgba(239, 68, 68, 0.3); color: #EF4444; padding: 14px; border-radius: 14px; text-align: center; font-weight: 700; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .logout-btn:hover { background: #EF4444; color: white; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2); }
+
+    /* === MAIN CONTENT === */
+    .main-content { flex: 1; margin-left: 280px; padding: 30px 40px; background: transparent; z-index: 1; width: calc(100% - 280px); display: flex; flex-direction: column; min-height: 100vh; }
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; animation: fadeInDown 0.5s ease; }
+    .header-icons { display: flex; align-items: center; gap: 15px; }
+    .icon-btn { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-dark); background: var(--glass-bg); border: 1px solid var(--glass-border); font-size: 1.2rem; transition: var(--transition); cursor: pointer; box-shadow: var(--glass-shadow); }
+    .icon-btn:hover { color: var(--brand-accent); transform: translateY(-2px); }
+    .page-title-box { margin-bottom: 25px; }
+    .page-title { font-weight: 800; color: var(--text-dark); margin-bottom: 5px; font-size: 2.2rem; letter-spacing: -1px; transition: color 0.3s; }
+    .page-subtitle { color: var(--text-muted); font-size: 1.05rem; transition: color 0.3s; }
+
+    /* Custom Dropdowns */
+    .custom-dropdown-menu { width: 320px; border: 1px solid var(--glass-border); border-radius: 16px; background: var(--glass-bg); backdrop-filter: blur(25px); box-shadow: var(--glass-shadow); padding: 10px 0; margin-top: 15px !important; position: absolute; top: 100%; right: 0; display: none; z-index: 9999; animation: fadeIn 0.2s ease-in-out; }
+    .custom-dropdown-menu.show-menu { display: block !important; }
+
+    /* Cards & Stats */
+    .content-card { background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 24px; padding: 30px; box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border); height: 100%; transition: all 0.3s ease; }
+    .content-card:hover { transform: translateY(-5px); box-shadow: 0 25px 45px rgba(0,0,0,0.08); }
+    .stat-gradient-1 { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); color: white; border: none; }
+    .stat-gradient-2 { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: white; border: none; }
+    .stat-gradient-3 { background: linear-gradient(135deg, #111827 0%, #1F2937 100%); color: white; border: none; }
+    .stat-box { display: flex; align-items: center; gap: 20px; }
+    .stat-icon-wrap { width: 65px; height: 65px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: rgba(255,255,255,0.15); box-shadow: inset 0 2px 10px rgba(255,255,255,0.1); }
+    .stat-box small { letter-spacing: 1px; opacity: 0.8; }
+    .stat-box h2 { font-size: 2.5rem; letter-spacing: -1px; margin: 0; line-height: 1; }
+
+    /* Tables */
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin: 0; }
+    .custom-table th { text-align: left; padding: 0 20px 10px 20px; color: var(--text-muted); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border: none; white-space: nowrap; }
+    .custom-table td { padding: 18px 20px; background: var(--glass-bg); color: var(--text-dark); font-weight: 600; border-top: 1px solid var(--glass-border); border-bottom: 1px solid var(--glass-border); vertical-align: middle; transition: 0.2s; }
+    .custom-table tr td:first-child { border-left: 1px solid var(--glass-border); border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+    .custom-table tr td:last-child { border-right: 1px solid var(--glass-border); border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+    .custom-table tr:hover td { filter: brightness(1.05); box-shadow: 0 5px 15px rgba(0,0,0,0.03); transform: scale(1.005); }
+
+    .status-pill { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .st-pending { background: #FEF3C7; color: #92400E; }
+    .st-shipped { background: #DBEAFE; color: #1E40AF; }
+    .st-delivered { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .st-return { background: #FEE2E2; color: #991B1B; }
+
+    /* Filters & Forms */
+    .filter-btn { cursor: pointer; padding: 8px 20px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-muted); transition: 0.3s; white-space: nowrap; }
+    .filter-btn:hover { filter: brightness(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .filter-btn.active { background: var(--brand-accent); color: white; border-color: var(--brand-accent); box-shadow: 0 5px 15px rgba(16,185,129,0.3); }
+
+    .form-control-custom { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-dark); padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; transition: 0.3s; }
+    .form-control-custom:focus { background: var(--glass-bg); border-color: var(--brand-accent); color: var(--text-dark); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); outline: none; }
+    .form-label-custom { font-size: 0.85rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+    /* Autocomplete Styles */
+    .autocomplete-list { z-index: 1050; top: 100%; max-height: 200px; overflow-y: auto; border-radius: 14px; background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); padding: 0; margin-top: 5px; list-style: none; }
+    .autocomplete-item { padding: 12px 20px; cursor: pointer; font-weight: 600; color: var(--text-dark); border-bottom: 1px solid var(--glass-border); transition: 0.2s; }
+    .autocomplete-item:hover { background: rgba(16, 185, 129, 0.1); color: var(--brand-accent); }
+    .autocomplete-item:last-child { border-bottom: none; }
+
+    .star-rating { direction: rtl; display: inline-flex; font-size: 2rem; justify-content: center; }
+    .star-rating input { display: none; }
+    .star-rating label { color: #E5E7EB; cursor: pointer; transition: 0.2s; padding: 0 5px; margin: 0; }
+    .star-rating label:hover, .star-rating label:hover ~ label, .star-rating input:checked ~ label { color: #F59E0B; text-shadow: 0 0 10px rgba(245,158,11,0.5); }
+
+    .farmer-glass-card { background: var(--glass-bg); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); transition: 0.3s; height: 100%; display: flex; flex-direction: column; }
+    .farmer-glass-card:hover { transform: translateY(-8px); border-bottom: 5px solid var(--brand-accent); }
+
+    /* Profile Photo Upload UI */
+    .profile-upload-wrapper { position: relative; width: 100px; height: 100px; margin: 0 auto 20px; cursor: pointer; }
+    .profile-upload-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--brand-accent); box-shadow: var(--glass-shadow); }
+    .profile-upload-overlay { position: absolute; bottom: 0; right: 0; background: var(--brand-accent); color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.3s; }
+    .profile-upload-wrapper:hover .profile-upload-overlay { transform: scale(1.1); }
+
+    /* Chat UI */
+    .chat-container { display: flex; flex-direction: column; height: 550px; background: var(--glass-bg); border-radius: 24px; overflow: hidden; border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+    .chat-header { padding: 20px 25px; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 15px; }
+    .chat-body { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+    .msg-bubble { max-width: 75%; padding: 15px 20px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; font-weight: 500; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+    .msg-bot { align-self: flex-start; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-dark); border-top-left-radius: 4px; }
+    .msg-user { align-self: flex-end; background: linear-gradient(135deg, var(--brand-accent), var(--brand-dark)); color: white; border-top-right-radius: 4px; box-shadow: 0 5px 15px rgba(16,185,129,0.2); }
+    .chat-footer { padding: 20px; border-top: 1px solid var(--glass-border); display: flex; gap: 15px; }
+    .chat-input { flex-grow: 1; border: 2px solid var(--glass-border); border-radius: 50px; padding: 12px 25px; outline: none; transition: 0.3s; font-size: 1rem; background: transparent; color: var(--text-dark); }
+    .chat-input:focus { border-color: var(--brand-accent); }
+    .send-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--brand-accent); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(16,185,129,0.3); flex-shrink: 0; }
+
+    /* === FARM-TO-TABLE TRACEABILITY TIMELINE CSS === */
+    .traceability-timeline { position: relative; padding-left: 30px; padding-top: 10px; }
+    .traceability-timeline::before { content: ''; position: absolute; left: 19px; top: 10px; bottom: 30px; width: 2px; background: var(--glass-border); z-index: 0; }
+    .timeline-step { position: relative; z-index: 1; margin-bottom: 25px; display: flex; align-items: flex-start; gap: 15px; }
+    .timeline-step:last-child { margin-bottom: 0; }
+    .timeline-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: var(--glass-shadow); flex-shrink: 0; background: var(--glass-bg); border: 2px solid var(--glass-border); color: var(--text-muted); transition: 0.3s; }
+    .timeline-content { transition: 0.3s; }
+
+    .step-active .timeline-icon { border-color: transparent; }
+    .step-inactive .timeline-icon { background: var(--glass-bg) !important; color: var(--text-muted) !important; border: 2px solid var(--glass-border) !important; }
+    .step-inactive .timeline-content { opacity: 0.4; }
+
+    .view-section { display: none; animation: fadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .view-section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-15px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 991px) { .main-content { margin-left: 0; width: 100%; padding: 20px; } .sidebar { transform: translateX(-100%); } }
+</style>
+
+<div class="live-bg">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+</div>
+
+<div class="dashboard-wrapper">
+
+    <div class="sidebar d-none d-md-flex">
+        <div class="sidebar-profile">
+            <div class="profile-img-wrap">
+                {% if user.customerprofile.profile_photo %}
+                    <img src="{{ user.customerprofile.profile_photo.url }}" class="profile-img shadow-sm">
+                {% else %}
+                    <div class="profile-initial shadow-sm">{{ request.user.first_name|slice:":1"|default:"C" }}</div>
+                {% endif %}
+            </div>
+            <h3 class="profile-name">{{ request.user.first_name }}</h3>
+            <div class="profile-handle">@{{ request.user.username }}</div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item"><a onclick="switchView('dashboard', this)" class="nav-link active"><div><i class="fas fa-layer-group nav-icon"></i> Dashboard</div></a></li>
+            <li class="nav-item"><a onclick="switchView('orders', this)" class="nav-link"><div><i class="fas fa-shopping-bag nav-icon"></i> My Orders</div>{% if orders.count > 0 %}<span class="nav-badge">{{ orders.count }}</span>{% endif %}</a></li>
+            <li class="nav-item"><a onclick="switchView('farmers', this)" class="nav-link"><div><i class="fas fa-tractor nav-icon"></i> Local Farmers</div></a></li>
+            <li class="nav-item"><a onclick="switchView('wallet', this)" class="nav-link"><div><i class="fas fa-wallet nav-icon"></i> Wallet</div></a></li>
+            <li class="nav-item"><a onclick="switchView('messages', this)" class="nav-link"><div><i class="fas fa-comment-dots nav-icon"></i> Messages</div></a></li>
+            <li class="nav-item"><a onclick="switchView('settings', this)" class="nav-link"><div><i class="fas fa-user-cog nav-icon"></i> Settings</div></a></li>
+        </ul>
+        <a href="{% url 'logout' %}" class="logout-btn" style="margin-top: auto;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main-content">
+
+        <header class="top-header">
+            <div></div>
+            <div class="header-icons ms-auto">
+
+                <div class="dropdown" style="position: relative;">
+                    <button class="icon-btn" onclick="toggleDropdown('weatherDropdown', event)" title="Weather Updates">
+                        <i class="fas fa-cloud-sun text-warning"></i>
+                    </button>
+                    <div id="weatherDropdown" class="custom-dropdown-menu p-4">
+                        <h6 class="fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.8rem;">Current Weather</h6>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <div class="text-dark fw-bold" style="font-size: 2.5rem; line-height: 1;">28°</div>
+                                <div class="text-muted fw-bold">Partly Cloudy</div>
+                            </div>
+                            <i class="fas fa-cloud-sun text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                        <div class="text-muted small mb-3"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ user.customerprofile.city|default:"Your Area" }}</div>
+                        <div class="d-flex justify-content-between small fw-bold text-muted border-top pt-3 mt-2" style="border-color: var(--glass-border);">
+                            <span><i class="fas fa-tint text-primary me-1"></i> 65%</span>
+                            <span><i class="fas fa-wind text-info me-1"></i> 14 km/h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown" style="position: relative;">
+                    <button class="icon-btn position-relative" onclick="toggleDropdown('notificationDropdown', event)" title="Notifications">
+                        <i class="far fa-bell"></i>
+                        {% if orders %}
+                        <span id="notifBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 10px; height: 10px;"></span>
+                        {% endif %}
+                    </button>
+                    <div id="notificationDropdown" class="custom-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
+                        <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--glass-border);">
+                            <h6 class="fw-bold text-dark mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">Notifications</h6>
+                            <button class="btn btn-sm btn-link text-danger text-decoration-none p-0 fw-bold" onclick="clearNotifications(event)"><i class="fas fa-trash-alt me-1"></i>Clear</button>
+                        </div>
+                        <div class="list-group list-group-flush" id="notificationList" style="max-height: 350px; overflow-y: auto;">
+                            {% for order in orders|slice:":5" %}
+                            <a href="javascript:void(0)" class="list-group-item list-group-item-action py-3 text-decoration-none" style="background: transparent; border-bottom: 1px solid var(--glass-border);" onclick="switchView('orders', document.querySelector('.nav-link[onclick*=\'orders\']')); toggleDropdown('notificationDropdown', event);">
+                                <div class="d-flex gap-3">
+                                    {% if order.status == 'Delivered' %}
+                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;"><i class="fas fa-check-circle"></i></div>
+                                    {% elif order.status == 'Shipped' %}
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;"><i class="fas fa-truck"></i></div>
+                                    {% elif order.status == 'Cancelled' %}
+                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;"><i class="fas fa-wallet"></i></div>
+                                    {% else %}
+                                        <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;"><i class="fas fa-clock"></i></div>
+                                    {% endif %}
+
+                                    <div>
+                                        {% if order.status == 'Cancelled' %}
+                                            <h6 class="mb-1 text-dark fw-bold" style="font-size: 0.95rem;">Refund Credited!</h6>
+                                            <small class="text-success fw-bold">+₹{{ order.total_price }} added to wallet for {{ order.crop.name }}.</small>
+                                        {% else %}
+                                            <h6 class="mb-1 text-dark fw-bold" style="font-size: 0.95rem;">Order {{ order.status }}</h6>
+                                            <small class="text-muted">{{ order.quantity }}kg of {{ order.crop.name }} is {{ order.status|lower }}.</small>
+                                        {% endif %}
+                                        <div class="text-muted mt-1" style="font-size: 0.7rem;"><i class="far fa-clock"></i> {{ order.date_ordered|date:"M d, Y" }}</div>
+                                    </div>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <div class="p-4 text-center text-muted small fw-bold">No new notifications.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="far fa-moon"></i></button>
+
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+
+            <div id="dashboard-view" class="view-section active">
+
+                {% if user.customerprofile.wallet_balance and user.customerprofile.wallet_balance < 500 %}
+                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark mb-4 rounded-4 shadow-sm p-3 d-flex align-items-center gap-3" style="position: relative; animation: none; box-shadow: none;">
+                    <div class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">Low Wallet Balance!</h6>
+                        <span class="small opacity-75">Your available balance is ₹{{ user.customerprofile.wallet_balance }}. Please top up to avoid order interruptions.</span>
+                    </div>
+                    <button class="btn btn-sm btn-warning ms-auto rounded-pill fw-bold" onclick="switchView('wallet', document.querySelector('.nav-link[onclick*=\'wallet\']'))">Top Up Now</button>
+                </div>
+                {% endif %}
+
+                <div class="page-title-box d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+                    <div>
+                        <h1 class="page-title">Welcome back, {{ request.user.first_name }} 👋</h1>
+                        <div class="page-subtitle">Here is your daily shopping activity and insights.</div>
+                    </div>
+                    <a href="{% url 'home' %}" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow" style="background: var(--brand-accent); border:none;"><i class="fas fa-store me-2"></i> Browse Shop</a>
+                </div>
+
+                <div class="w-100 p-3 mb-4 rounded-4 shadow-sm d-flex align-items-center justify-content-between" style="background-color: #1A4331; border-left: 5px solid var(--brand-accent);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 55px; height: 55px; background-color: rgba(255,255,255,0.15);">
+                            <i class="fas fa-robot text-white fa-2x"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold text-white mb-1">Smart Buyer Insight</h5>
+                            <p class="text-white opacity-75 small mb-0" style="transition: opacity 0.3s ease;">
+                                <i id="insightIcon" class="fas fa-leaf text-white me-1 opacity-100" style="transition: opacity 0.3s ease;"></i>
+                                <span id="insightText" style="transition: opacity 0.3s ease;">Buying local produce directly supports your community farmers!</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="badge rounded-pill bg-white text-dark px-3 py-2 fw-bold d-flex align-items-center gap-1 border border-light d-none d-md-flex flex-shrink-0">
+                        <i class="fas fa-bolt" style="color: #1A4331;"></i> <span style="color: #1A4331;">AI Powered</span>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="content-card stat-gradient-1 shadow-lg">
+                            <div class="stat-box">
+                                <div class="stat-icon-wrap"><i class="fas fa-shopping-basket"></i></div>
+                                <div><small class="fw-bold text-uppercase">Total Orders</small><h2 class="mb-0 fw-bold">{{ orders.count|default:0 }}</h2></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="content-card stat-gradient-2 shadow-lg">
+                            <div class="stat-box">
+                                <div class="stat-icon-wrap"><i class="fas fa-leaf"></i></div>
+                                <div><small class="fw-bold text-uppercase">Fresh Delivered</small><h2 class="mb-0 fw-bold">{{ delivered_count|default:0 }}</h2></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="content-card stat-gradient-3 shadow-lg">
+                            <div class="stat-box">
+                                <div class="stat-icon-wrap text-warning"><i class="fas fa-wallet"></i></div>
+                                <div><small class="fw-bold text-uppercase text-white-50">Wallet Balance</small><h2 class="mb-0 fw-bold text-white">₹{{ user.customerprofile.wallet_balance|default:"0.00" }}</h2></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-lg-4">
+                        <div class="content-card h-100 p-0 overflow-hidden d-flex flex-column">
+                            <div class="p-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--glass-border);">
+                                <h5 class="fw-bold mb-0 text-dark">Quick Actions</h5>
+                            </div>
+                            <div class="p-4 flex-grow-1 d-flex flex-column justify-content-center gap-3">
+                                <button class="btn w-100 rounded-pill py-3 fw-bold text-start shadow-sm border d-flex align-items-center justify-content-between" style="background: var(--glass-bg); color: var(--text-dark); border-color: var(--glass-border);" onclick="switchView('orders', document.querySelector('.nav-link[onclick*=\'orders\']'))">
+                                    <span><i class="fas fa-box-open text-primary me-2"></i> Track Recent Order</span>
+                                    <i class="fas fa-chevron-right text-muted small"></i>
+                                </button>
+                                <button class="btn w-100 rounded-pill py-3 fw-bold text-start shadow-sm border d-flex align-items-center justify-content-between" style="background: var(--glass-bg); color: var(--text-dark); border-color: var(--glass-border);" onclick="switchView('messages', document.querySelector('.nav-link[onclick*=\'messages\']'))">
+                                    <span><i class="fas fa-headset text-success me-2"></i> Contact Support</span>
+                                    <i class="fas fa-chevron-right text-muted small"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="content-card h-100 d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3" style="border-color: var(--glass-border);">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-chart-area text-primary me-2"></i>Spending Analytics</h5>
+                                <span class="badge border" style="background: var(--glass-bg); color: var(--text-dark);">Last 6 Months</span>
+                            </div>
+                            <div style="flex-grow: 1; min-height: 200px; width: 100%;">
+                                <canvas id="spendingChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="content-card h-100">
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3" style="border-color: var(--glass-border);">
+                                <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-map-marker-alt text-danger me-2"></i>Default Address</h5>
+                                <button class="btn btn-sm rounded-pill px-3 shadow-sm fw-bold border text-dark" style="background: var(--glass-bg);" onclick="switchView('settings', document.querySelector('.nav-link[onclick*=\'settings\']'))">Edit</button>
+                            </div>
+                            <div class="p-4 rounded-4" style="background: var(--glass-bg); border: 1px solid var(--glass-border);">
+                                <strong class="d-block text-dark fs-5 mb-2">{{ request.user.get_full_name }}</strong>
+                                <p class="text-muted mb-0 lh-lg" style="font-size: 0.95rem;">
+                                    {% if user.customerprofile.address or user.customerprofile.city or user.customerprofile.pincode %}
+                                        {% if user.customerprofile.address %}
+                                            <i class="fas fa-home me-2 text-primary opacity-50"></i> {{ user.customerprofile.address }}<br>
+                                        {% endif %}
+                                        <i class="fas fa-city me-2 text-primary opacity-50"></i>
+                                        {{ user.customerprofile.city|default:"City not set" }}, {{ user.customerprofile.state|default:"State not set" }} - {{ user.customerprofile.pincode|default:"No Pincode" }}<br>
+                                        <i class="fas fa-phone-alt me-2 text-primary opacity-50"></i> {{ user.customerprofile.phone_number|default:"No Phone Number added" }}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">No address details added. Go to Settings to add an address.</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="content-card d-flex flex-column justify-content-between p-4 h-100">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="icon-box-stat bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; font-size: 1.4rem; border-radius: 15px;"><i class="fas fa-chart-line"></i></div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 d-flex align-items-center">Lifetime</span>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Total Amount Spent</h6>
+                                <h3 class="fw-bold text-dark mb-1" style="font-size: 2.2rem;">₹{{ total_spent|default:"0.00" }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="orders-view" class="view-section">
+                <div class="page-title-box mb-4">
+                    <h1 class="page-title">My Orders</h1>
+                    <div class="page-subtitle">Track shipments, manage returns, and rate your received produce.</div>
+                </div>
+
+                <div class="content-card p-0 overflow-hidden">
+                    <div class="p-4 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3" style="border-color: var(--glass-border);">
+                        <h5 class="fw-bold mb-0 text-dark">Order History</h5>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="filter-btn active shadow-sm" onclick="filterTable('all', this)">All</span>
+                            <span class="filter-btn shadow-sm" onclick="filterTable('Pending', this)">Pending</span>
+                            <span class="filter-btn shadow-sm" onclick="filterTable('Delivered', this)">Delivered</span>
+                            <span class="filter-btn shadow-sm" onclick="filterTable('Return', this)">Returns</span>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive px-3 pb-3 pt-2">
+                        <table class="custom-table m-0" id="ordersTable">
+                            <thead><tr><th class="ps-4">Product</th><th>Date</th><th>Amount</th><th>Status</th><th class="text-end pe-4">Action</th></tr></thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr class="order-row" data-status="{{ order.status }}">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            {% if order.crop.image %}
+                                                <img src="{{ order.crop.image.url }}" style="width: 50px; height: 50px; border-radius: 12px; margin-right: 15px; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                            {% else %}
+                                                <div style="width: 50px; height: 50px; background: rgba(0,0,0,0.05); border-radius: 12px; margin-right: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><i class="fas fa-leaf text-success fs-4"></i></div>
+                                            {% endif %}
+                                            <div><div class="fw-bold text-dark fs-6 text-truncate" style="max-width: 150px;">{{ order.crop.name }}</div><small class="text-muted fw-bold">{{ order.quantity }} kg</small></div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted fw-bold">{{ order.date_ordered|date:"M d, Y" }}</td>
+                                    <td class="fw-bold text-success fs-5">₹{{ order.total_price }}</td>
+                                    <td>
+                                        {% if order.status == 'Pending' %}
+                                            <span class="status-pill st-pending"><i class="fas fa-clock"></i> Pending</span>
+                                        {% elif order.status == 'Shipped' %}
+                                            <span class="status-pill st-shipped"><i class="fas fa-truck"></i> Shipped</span>
+                                        {% elif order.status == 'Delivered' %}
+                                            <span class="status-pill st-delivered"><i class="fas fa-check-circle"></i> Delivered</span>
+                                        {% elif order.status == 'Return Requested' %}
+                                            <span class="status-pill st-return"><i class="fas fa-undo"></i> Return Pending</span>
+                                        {% elif order.status == 'Cancellation Requested' %}
+                                            <span class="status-pill st-pending" style="background: #FEF3C7; color: #D97706;"><i class="fas fa-times-circle"></i> Cancel Pending</span>
+                                        {% elif order.status == 'Cancelled' %}
+                                            <span class="status-pill" style="background: var(--glass-border); color: var(--text-muted);"><i class="fas fa-ban"></i> Cancelled</span>
+                                        {% else %}
+                                            <span class="status-pill" style="background: #eee; color: #333;">{{ order.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex justify-content-end gap-2 align-items-center">
+                                            <button class="btn btn-sm btn-primary rounded-pill fw-bold px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#trackModal{{ order.id }}">Track Order</button>
+
+                                            {% if order.status == 'Delivered' %}
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#returnModal{{ order.id }}">Return</button>
+                                            {% elif order.status == 'Pending' %}
+                                                <button class="btn btn-sm btn-outline-danger rounded-pill fw-bold px-3 shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#cancelModal{{ order.id }}">Cancel</button>
+                                            {% elif order.status == 'Return Requested' %}
+                                                <span class="text-danger small fw-bold px-3 align-self-center"><i class="fas fa-sync fa-spin"></i> Returning</span>
+                                            {% elif order.status == 'Cancellation Requested' %}
+                                                <span class="text-warning small fw-bold px-3 align-self-center"><i class="fas fa-clock"></i> Cancelling</span>
+                                            {% elif order.status == 'Cancelled' %}
+                                                <span class="text-muted small fw-bold px-3 align-self-center"><i class="fas fa-ban"></i> Cancelled</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fas fa-box-open fa-3x mb-3 opacity-25 d-block"></i><h5 class="fw-bold">No orders found. Start Shopping!</h5></td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="farmers-view" class="view-section">
+                <div class="page-title-box mb-4">
+                    <h1 class="page-title">Local Farmers</h1>
+                    <div class="page-subtitle">View, contact, and rate farmers currently listed on the platform.</div>
+                </div>
+
+                <div class="row g-4">
+                    {% for farmer in farmers %}
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="farmer-glass-card">
+                            <div class="position-relative d-inline-block mb-3">
+                                {% if farmer.farmerprofile.profile_photo %}
+                                    <img src="{{ farmer.farmerprofile.profile_photo.url }}" class="rounded-circle shadow" style="width: 90px; height: 90px; object-fit: cover; border: 3px solid white;">
+                                {% else %}
+                                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow" style="width: 90px; height: 90px; font-size: 2.5rem; font-weight: bold; margin: 0 auto; border: 3px solid white;">
+                                        {{ farmer.first_name|slice:":1"|default:"F" }}
+                                    </div>
+                                {% endif %}
+                                <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-2" title="Active Platform Member" style="width: 20px; height: 20px; box-shadow: 0 0 10px rgba(16,185,129,0.5);"></span>
+                            </div>
+
+                            <h5 class="fw-bold text-dark mb-1">{{ farmer.get_full_name|default:farmer.username }}</h5>
+                            <div class="text-warning small mb-2 fw-bold"><i class="fas fa-star"></i> 4.8</div>
+                            <p class="text-muted small mb-4"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ farmer.farmerprofile.area|default:"Location Not Set" }}</p>
+
+                            <div class="mt-auto d-flex flex-column gap-2">
+                                <button class="btn btn-sm w-100 rounded-pill fw-bold text-white shadow-sm" style="background: var(--brand-accent);" onclick="switchView('messages', document.querySelector('.nav-link[onclick*=\'messages\']')); document.getElementById('farmerSelect').value='{{ farmer.username }}';">Send Message</button>
+                                <button class="btn btn-sm w-100 rounded-pill fw-bold border text-dark" style="background: var(--glass-bg);" data-bs-toggle="modal" data-bs-target="#rateFarmerModal{{ farmer.id }}">Rate Farmer</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5 text-muted"><i class="fas fa-user-slash fa-3x mb-3 opacity-25 d-block"></i><h5 class="fw-bold">No farmers found on the network.</h5></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="wallet-view" class="view-section">
+                <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+                    <div>
+                        <h1 class="page-title">My Wallet</h1>
+                        <div class="page-subtitle">Manage your funds, view spent analytics, and top up.</div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <div class="content-card stat-gradient-2 position-relative overflow-hidden h-100 shadow-lg border-0 d-flex flex-column">
+                                    <div style="position: absolute; right: -20px; top: -20px; font-size: 8rem; opacity: 0.1;"><i class="fas fa-wallet"></i></div>
+                                    <h6 class="opacity-75 mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Available Balance</h6>
+                                    <h2 class="fw-bold mb-2" style="font-size: 3rem;">₹{{ user.customerprofile.wallet_balance|default:"0.00" }}</h2>
+                                    <p class="small opacity-75 mb-0 mt-auto">Funds secure and ready.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="content-card d-flex flex-column justify-content-between p-4 h-100">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <div class="icon-box-stat bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 55px; height: 55px; font-size: 1.4rem; border-radius: 15px;"><i class="fas fa-chart-line"></i></div>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 d-flex align-items-center">Lifetime</span>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-muted mb-1 text-uppercase fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">Total Amount Spent</h6>
+                                        <h3 class="fw-bold text-dark mb-1" style="font-size: 2.2rem;">₹{{ total_spent|default:"0.00" }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card p-0 overflow-hidden">
+                            <div class="p-4 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--glass-border);">
+                                <h5 class="fw-bold text-dark mb-0">Recent Transactions</h5>
+                                <button class="btn btn-sm btn-outline-dark rounded-pill fw-bold px-3">Download PDF</button>
+                            </div>
+                            <div class="table-responsive p-3">
+                                <table class="custom-table m-0">
+                                    <thead><tr><th class="ps-4">Transaction</th><th>Date</th><th>Status</th><th class="pe-4 text-end">Amount</th></tr></thead>
+                                    <tbody>
+                                        {% for order in orders|slice:":5" %}
+                                            {% if order.status == 'Cancelled' %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-undo"></i></div>
+                                                        <div><div class="fw-bold text-dark">Order #{{ order.id }} Refund</div><small class="text-muted">Cancelled {{ order.crop.name }}</small></div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-muted fw-bold small">{{ order.date_ordered|date:"M d, Y" }}</td>
+                                                <td><span class="status-pill st-delivered">Refunded</span></td>
+                                                <td class="pe-4 text-end fw-bold text-success fs-6">+ ₹{{ order.total_price }}</td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-arrow-up"></i></div>
+                                                        <div><div class="fw-bold text-dark">Order #{{ order.id }} Payment</div><small class="text-muted">Purchased {{ order.crop.name }}</small></div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-muted fw-bold small">{{ order.date_ordered|date:"M d, Y" }}</td>
+                                                <td><span class="status-pill st-delivered">Completed</span></td>
+                                                <td class="pe-4 text-end fw-bold text-danger fs-6">- ₹{{ order.total_price }}</td>
+                                            </tr>
+                                            {% endif %}
+                                        {% empty %}
+                                        <tr><td colspan="4" class="text-center text-muted py-5 fw-bold">No recent transactions found.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="content-card h-100">
+                            <h5 class="fw-bold text-dark mb-4 border-bottom pb-3" style="border-color: var(--glass-border);"><i class="fas fa-plus-circle text-success me-2"></i> Top Up Wallet</h5>
+
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="top_up_wallet">
+                                <label class="form-label-custom">Select Amount</label>
+                                <div class="row g-2 mb-4">
+                                    <div class="col-4"><button type="button" class="btn btn-outline-success w-100 fw-bold rounded-3" onclick="document.getElementById('topUpAmount').value=500">₹500</button></div>
+                                    <div class="col-4"><button type="button" class="btn btn-outline-success w-100 fw-bold rounded-3" onclick="document.getElementById('topUpAmount').value=1000">₹1000</button></div>
+                                    <div class="col-4"><button type="button" class="btn btn-outline-success w-100 fw-bold rounded-3" onclick="document.getElementById('topUpAmount').value=2000">₹2000</button></div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label-custom">Custom Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 fw-bold text-muted" style="background: var(--glass-bg); border-color: var(--glass-border);">₹</span>
+                                        <input type="number" id="topUpAmount" name="amount" class="form-control border-start-0 fw-bold fs-5" style="background: var(--glass-bg); border-color: var(--glass-border); color: var(--text-dark);" placeholder="0.00" required min="1">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn text-white w-100 py-3 rounded-pill fw-bold shadow-sm fs-6" style="background: var(--brand-accent);" onclick="saveActiveTab()"><i class="fas fa-lock me-2"></i> Proceed to Payment</button>
+                                <div class="text-center mt-3 small text-muted"><i class="fas fa-shield-alt me-1"></i> Secured by Razorpay</div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="messages-view" class="view-section">
+                <div class="page-title-box mb-4">
+                    <h1 class="page-title">Message Box</h1>
+                    <div class="page-subtitle">Chat directly with farmers regarding your orders.</div>
+                </div>
+
+                <div class="chat-container shadow-sm mx-auto" style="max-width: 900px;">
+                    <div class="chat-header">
+                        <div class="d-flex align-items-center gap-3 w-100">
+                            <div class="rounded-circle stat-gradient-2 d-flex align-items-center justify-content-center fw-bold shadow-sm flex-shrink-0" style="width: 50px; height: 50px; font-size: 1.2rem;"><i class="fas fa-tractor"></i></div>
+                            <div class="flex-grow-1">
+                                <strong class="d-block text-muted small mb-1 text-uppercase fw-bold" style="letter-spacing: 0.5px;">Select Recipient</strong>
+                                <select id="farmerSelect" class="form-select border-0 bg-transparent text-dark fw-bold fs-6 p-0" style="outline: none; box-shadow: none; cursor: pointer;">
+                                    <option value="" selected disabled>Choose a Farmer...</option>
+                                    {% for farmer in farmers %}
+                                        <option value="{{ farmer.username }}">{{ farmer.get_full_name|default:farmer.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-body" id="chatBox">
+                        <div class="msg-bubble msg-bot shadow-sm">Hello! 👋 Please select a farmer from the dropdown above to start a secure conversation.</div>
+                    </div>
+                    <div class="chat-footer align-items-center">
+                        <input type="text" class="chat-input" id="userMsg" placeholder="Type your message here..." onkeypress="handleEnter(event)">
+                        <button class="send-btn shadow-sm" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settings-view" class="view-section">
+                <div class="page-title-box mb-4">
+                    <h1 class="page-title">Profile Settings</h1>
+                    <div class="page-subtitle">Update your personal details, secure your account, and manage addresses.</div>
+                </div>
+
+                <div class="row g-4 mb-4">
+
+                    <div class="col-lg-6">
+                        <div class="content-card h-100">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="update_profile">
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-3" style="border-color: var(--glass-border);"><i class="fas fa-user-edit text-primary me-2"></i> Account Details</h5>
+
+                                <div class="text-center mb-4">
+                                    <div class="profile-upload-wrapper" onclick="document.getElementById('profilePhotoInput').click();">
+                                        {% if user.customerprofile.profile_photo %}
+                                            <img id="profilePreview" src="{{ user.customerprofile.profile_photo.url }}">
+                                        {% else %}
+                                            <img id="profilePreview" src="https://ui-avatars.com/api/?name={{ request.user.first_name|default:'User' }}&background=10B981&color=fff&size=150">
+                                        {% endif %}
+                                        <div class="profile-upload-overlay"><i class="fas fa-camera"></i></div>
+                                    </div>
+                                    <input type="file" id="profilePhotoInput" name="profile_photo" accept="image/*" class="d-none" onchange="previewProfileImage(this)">
+                                    <small class="text-muted fw-bold">Click to change photo</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Username</label>
+                                    <input type="text" name="username" class="form-control-custom" value="{{ user.username|default:'' }}" required>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label-custom">First Name</label>
+                                        <input type="text" name="first_name" class="form-control-custom" value="{{ user.first_name|default:'' }}" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label-custom">Last Name</label>
+                                        <input type="text" name="last_name" class="form-control-custom" value="{{ user.last_name|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label-custom">Email Address</label>
+                                    <input type="email" name="email" class="form-control-custom" value="{{ user.email|default:'' }}" required>
+                                </div>
+                                <button type="submit" class="btn text-white w-100 py-3 rounded-pill fw-bold shadow-sm fs-6 mt-auto" style="background: var(--brand-accent);" onclick="saveActiveTab()">Save Account Details</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="content-card h-100">
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="change_password">
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-3" style="border-color: var(--glass-border);"><i class="fas fa-lock text-warning me-2"></i> Change Password</h5>
+
+                                <div class="alert border-0 bg-warning bg-opacity-10 text-dark small fw-bold mb-4 rounded-3"><i class="fas fa-shield-alt me-2"></i>Ensure your new password is at least 8 characters long.</div>
+
+                                <div class="mb-3">
+                                    <label class="form-label-custom">Current Password</label>
+                                    <input type="password" name="old_password" class="form-control-custom" placeholder="Enter current password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label-custom">New Password</label>
+                                    <input type="password" name="new_password" class="form-control-custom" placeholder="Enter new password" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label-custom">Confirm New Password</label>
+                                    <input type="password" name="confirm_password" class="form-control-custom" placeholder="Confirm new password" required>
+                                </div>
+                                <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow-sm fs-6 mt-auto" onclick="saveActiveTab()">Update Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="content-card">
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="update_address">
+                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-3" style="border-color: var(--glass-border);"><i class="fas fa-map-marked-alt text-danger me-2"></i> Delivery Address</h5>
+
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <div class="mb-0 h-100 d-flex flex-column">
+                                            <label class="form-label-custom">Full Address</label>
+                                            <textarea name="address" class="form-control-custom flex-grow-1" placeholder="Enter your full street address...">{{ user.customerprofile.address|default:"" }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="row g-3">
+                                            <div class="col-6 position-relative">
+                                                <label class="form-label-custom">City</label>
+                                                <input type="text" name="city" id="cityInput" class="form-control-custom" value="{{ user.customerprofile.city|default:'' }}" placeholder="Type city..." autocomplete="off">
+                                                <ul class="autocomplete-list position-absolute w-100 shadow-sm d-none" id="citySuggestions"></ul>
+                                            </div>
+                                            <div class="col-6 position-relative">
+                                                <label class="form-label-custom">State</label>
+                                                <input type="text" name="state" id="stateInput" class="form-control-custom" value="{{ user.customerprofile.state|default:'' }}" placeholder="Type state..." autocomplete="off">
+                                                <ul class="autocomplete-list position-absolute w-100 shadow-sm d-none" id="stateSuggestions"></ul>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label-custom">Pincode</label>
+                                                <input type="text" name="pincode" class="form-control-custom" value="{{ user.customerprofile.pincode|default:'' }}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label-custom">Phone Number</label>
+                                                <input type="text" name="phone_number" class="form-control-custom" value="{{ user.customerprofile.phone_number|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-end border-top pt-4" style="border-color: var(--glass-border);">
+                                    <button type="submit" class="btn text-white px-5 py-3 rounded-pill fw-bold shadow-sm fs-6" style="background: var(--brand-accent);" onclick="saveActiveTab()">Save Address Details</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% for order in orders %}
+    <div class="modal fade" id="cancelModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0 pb-0 justify-content-between align-items-center">
+                    <h5 class="modal-title fw-bold text-dark">Cancel Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-start p-4">
+                    <p class="text-muted mb-4">Are you sure you want to cancel your order for <strong>{{ order.crop.name }}</strong>? The refund of <strong>₹{{ order.total_price }}</strong> will be credited to your wallet once the farmer approves the cancellation.</p>
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action_type" value="request_cancellation">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <label class="form-label-custom">Reason for Cancellation (Optional)</label>
+                        <textarea name="cancel_reason" class="form-control-custom mb-4" rows="2" placeholder="Tell us why you are cancelling..."></textarea>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light w-50 rounded-pill fw-bold py-3 shadow-sm text-dark border" data-bs-dismiss="modal">Keep Order</button>
+                            <button type="submit" class="btn btn-danger w-50 rounded-pill fw-bold py-3 shadow-sm" onclick="saveActiveTab()">Request Cancellation</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="returnModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0 pb-0 justify-content-between align-items-center">
+                    <h5 class="modal-title fw-bold text-dark">Return {{ order.crop.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-start p-4">
+                    <form action="" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action_type" value="request_return">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <label class="form-label-custom">Reason for Return</label>
+                        <select name="reason" class="form-control-custom mb-4" required>
+                            <option value="" selected disabled>Select a reason...</option>
+                            <option value="Quality Issue">Quality Issue</option>
+                            <option value="Damaged">Item Damaged</option>
+                            <option value="Wrong Item">Wrong Item</option>
+                        </select>
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold py-3 shadow-sm" onclick="saveActiveTab()">Confirm Return Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="trackModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0 pb-0 justify-content-end">
+                    <button type="button" class="btn-close mt-2 me-2" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-0">
+                    <div class="text-center mb-4">
+                        <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success px-3 py-2 mb-2"><i class="fas fa-leaf me-1"></i> Farm-to-Table Verified</span>
+                        <h5 class="fw-bold text-dark mb-0">Traceability Report</h5>
+                        <small class="text-muted">Tracking the journey of your {{ order.crop.name }}</small>
+                    </div>
+
+                    <div class="traceability-timeline">
+                        <div class="timeline-step step-active">
+                            <div class="timeline-icon" style="background: #10B981; color: white; border-color: #10B981;"><i class="fas fa-seedling"></i></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0 fw-bold text-dark">Cultivation Started</h6>
+                                <small class="text-muted fw-bold">Grown organically by {{ order.farmer.first_name|default:"Local Farmer" }}</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step step-active">
+                            <div class="timeline-icon" style="background: #F59E0B; color: white; border-color: #F59E0B;"><i class="fas fa-tractor"></i></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0 fw-bold text-dark">Harvested & Quality Checked</h6>
+                                <small class="text-muted fw-bold">Freshly picked from the farm</small>
+                            </div>
+                        </div>
+
+                        <div class="timeline-step step-active">
+                            <div class="timeline-icon" style="background: #3B82F6; color: white; border-color: #3B82F6;"><i class="fas fa-check"></i></div>
+                            <div class="timeline-content">
+                                <h6 class="mb-0 fw-bold text-dark">Order Confirmed</h6>
+                                <small class="text-muted fw-bold">{{ order.date_ordered|date:"M d, Y - H:i" }}</small>
+                            </div>
+                        </div>
+
+                        {% if order.status == 'Cancellation Requested' or order.status == 'Cancelled' %}
+                            <div class="timeline-step step-active">
+                                <div class="timeline-icon" style="background: #F59E0B; color: white; border-color: #F59E0B;"><i class="fas fa-times-circle"></i></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0 fw-bold text-dark">Cancellation Requested</h6>
+                                    <small class="text-muted fw-bold">Waiting for farmer approval</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-step {% if order.status == 'Cancelled' %}step-active{% else %}step-inactive{% endif %}">
+                                <div class="timeline-icon" {% if order.status == 'Cancelled' %}style="background: #EF4444; color: white; border-color: #EF4444;"{% endif %}><i class="fas fa-ban"></i></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0 fw-bold text-dark">Order Cancelled</h6>
+                                    {% if order.status == 'Cancelled' %}
+                                    <small class="text-muted fw-bold">Refund credited to your wallet</small>
+                                    {% else %}
+                                    <small class="text-muted fw-bold">Pending approval</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="timeline-step {% if order.status == 'Shipped' or order.status == 'Delivered' or order.status == 'Return Requested' or order.status == 'Returned' %}step-active{% else %}step-inactive{% endif %}">
+                                <div class="timeline-icon" {% if order.status == 'Shipped' or order.status == 'Delivered' or order.status == 'Return Requested' or order.status == 'Returned' %}style="background: #8B5CF6; color: white; border-color: #8B5CF6;"{% endif %}><i class="fas fa-truck"></i></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0 fw-bold text-dark">In Transit</h6>
+                                    <small class="text-muted fw-bold">Shipped to your delivery address</small>
+                                </div>
+                            </div>
+
+                            <div class="timeline-step {% if order.status == 'Delivered' or order.status == 'Return Requested' or order.status == 'Returned' %}step-active{% else %}step-inactive{% endif %}">
+                                <div class="timeline-icon" {% if order.status == 'Delivered' or order.status == 'Return Requested' or order.status == 'Returned' %}style="background: #10B981; color: white; border-color: #10B981;"{% endif %}><i class="fas fa-box-open"></i></div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-0 fw-bold text-dark">Delivered</h6>
+                                    <small class="text-muted fw-bold">Farm-fresh produce at your doorstep</small>
+                                </div>
+                            </div>
+
+                            {% if order.status == 'Return Requested' or order.status == 'Returned' %}
+                                <div class="timeline-step step-active">
+                                    <div class="timeline-icon" style="background: #F59E0B; color: white; border-color: #F59E0B;"><i class="fas fa-undo"></i></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-0 fw-bold text-dark">Return Requested</h6>
+                                        <small class="text-muted fw-bold">Pickup arranged</small>
+                                    </div>
+                                </div>
+                                <div class="timeline-step {% if order.status == 'Returned' %}step-active{% else %}step-inactive{% endif %}">
+                                    <div class="timeline-icon" {% if order.status == 'Returned' %}style="background: #EF4444; color: white; border-color: #EF4444;"{% endif %}><i class="fas fa-box"></i></div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-0 fw-bold text-dark">Order Returned</h6>
+                                        {% if order.status == 'Returned' %}
+                                        <small class="text-muted fw-bold">Refund processed</small>
+                                        {% else %}
+                                        <small class="text-muted fw-bold">Pending return completion</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% for farmer in farmers %}
+<div class="modal fade" id="rateFarmerModal{{ farmer.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+            <div class="modal-header border-0 pb-0 position-relative">
+                <h4 class="modal-title fw-bold text-dark w-100 text-center mt-2">Rate Farmer</h4>
+                <button type="button" class="btn-close position-absolute top-0 end-0 mt-3 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm overflow-hidden" style="width: 80px; height: 80px; border: 3px solid var(--brand-accent);">
+                    {% if farmer.farmerprofile.profile_photo %}
+                        <img src="{{ farmer.farmerprofile.profile_photo.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-success w-100 h-100 text-white d-flex align-items-center justify-content-center fs-1 fw-bold">{{ farmer.first_name|slice:":1"|default:"F" }}</div>
+                    {% endif %}
+                </div>
+                <h5 class="fw-bold text-dark mb-1">{{ farmer.get_full_name|default:farmer.username }}</h5>
+                <p class="text-muted small mb-4">Support local agriculture by leaving a review!</p>
+
+                <div class="star-rating mb-4 w-100 d-flex justify-content-center">
+                    <input type="radio" id="fstar5_{{ farmer.id }}" name="farmer_rating" value="5"><label for="fstar5_{{ farmer.id }}" title="5 stars"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="fstar4_{{ farmer.id }}" name="farmer_rating" value="4"><label for="fstar4_{{ farmer.id }}" title="4 stars"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="fstar3_{{ farmer.id }}" name="farmer_rating" value="3"><label for="fstar3_{{ farmer.id }}" title="3 stars"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="fstar2_{{ farmer.id }}" name="farmer_rating" value="2"><label for="fstar2_{{ farmer.id }}" title="2 stars"><i class="fas fa-star"></i></label>
+                    <input type="radio" id="fstar1_{{ farmer.id }}" name="farmer_rating" value="1"><label for="fstar1_{{ farmer.id }}" title="1 star"><i class="fas fa-star"></i></label>
+                </div>
+
+                <textarea class="form-control-custom mb-4" rows="3" placeholder="Tell others about your experience..."></textarea>
+                <button type="button" class="btn text-white w-100 rounded-pill py-3 fw-bold shadow-sm fs-6" style="background: var(--brand-accent);" data-bs-dismiss="modal">Submit Farmer Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+    // Tab Memory Logic - Ensures you stay on the settings page after saving
+    function saveActiveTab() {
+        const activeTab = document.querySelector('.view-section.active').id.replace('-view', '');
+        sessionStorage.setItem('activeCustomerTab', activeTab);
+    }
+
+    // FUNCTION TO CLEAR NOTIFICATIONS
+    function clearNotifications(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Empty the list
+        const notifList = document.getElementById('notificationList');
+        if(notifList) {
+            notifList.innerHTML = '<div class="p-4 text-center text-muted small fw-bold">No new notifications.</div>';
+        }
+
+        // Remove the red badge on the bell
+        const badge = document.getElementById('notifBadge');
+        if(badge) {
+            badge.style.display = 'none';
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // === Auto-hide Alerts after 4 seconds ===
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 4000);
+
+        const savedTab = sessionStorage.getItem('activeCustomerTab');
+        if(savedTab) {
+            const targetLink = document.querySelector(`.nav-link[onclick*="'${savedTab}'"]`);
+            if(targetLink) {
+                switchView(savedTab, targetLink);
+            }
+            sessionStorage.removeItem('activeCustomerTab');
+        }
+
+        // Initialize Chart
+        const ctx = document.getElementById('spendingChart');
+        if (ctx) {
+            let gridColor = localStorage.getItem('theme') === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+            window.spendingChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                    datasets: [{
+                        label: 'Amount Spent (₹)',
+                        data: [1200, 1900, 1500, 2200, 1800, 2500],
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#10B981',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, grid: { borderDash: [5, 5], color: gridColor } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+    });
+
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = themeBtn.querySelector('i');
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme');
+            themeIcon.classList.replace('fa-sun', 'fa-moon');
+            localStorage.setItem('theme', 'light');
+            if(window.spendingChartInstance) {
+                window.spendingChartInstance.options.scales.y.grid.color = 'rgba(0,0,0,0.05)';
+                window.spendingChartInstance.update();
+            }
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+            localStorage.setItem('theme', 'dark');
+            if(window.spendingChartInstance) {
+                window.spendingChartInstance.options.scales.y.grid.color = 'rgba(255,255,255,0.05)';
+                window.spendingChartInstance.update();
+            }
+        }
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+    }
+
+    // Dropdown Logic
+    function toggleDropdown(dropdownId, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const menu = document.getElementById(dropdownId);
+        const isShowing = menu.classList.contains('show-menu');
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show-menu'));
+        if (!isShowing) menu.classList.add('show-menu');
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.dropdown')) {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => m.classList.remove('show-menu'));
+        }
+    });
+
+    // === SMART AUTOCOMPLETE DROPDOWN LOGIC ===
+    const indianStates = [
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+        "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+        "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+        "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+    ];
+
+    const popularCities = [
+        "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode",
+        "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad",
+        "Kumarakom", "Munnar", "Vagamon", "Pala", "Ramapuram", "Thalayolaparambu", "Bangalore",
+        "Mumbai", "Delhi", "Chennai", "Kochi"
+    ];
+
+    function setupAutocomplete(inputId, suggestionsId, dataArray) {
+        const inputEl = document.getElementById(inputId);
+        const suggestionsEl = document.getElementById(suggestionsId);
+
+        if (inputEl && suggestionsEl) {
+            inputEl.addEventListener('input', function() {
+                const val = this.value.toLowerCase();
+                suggestionsEl.innerHTML = '';
+                if (val) {
+                    const matches = dataArray.filter(item => item.toLowerCase().startsWith(val));
+                    if (matches.length > 0) {
+                        suggestionsEl.classList.remove('d-none');
+                        matches.forEach(match => {
+                            const li = document.createElement('li');
+                            li.className = 'autocomplete-item';
+                            const regex = new RegExp(`^(${val})`, "gi");
+                            li.innerHTML = match.replace(regex, "<span class='text-success'>$1</span>");
+                            li.addEventListener('click', function() {
+                                inputEl.value = match;
+                                suggestionsEl.classList.add('d-none');
+                            });
+                            suggestionsEl.appendChild(li);
+                        });
+                    } else {
+                        suggestionsEl.classList.add('d-none');
+                    }
+                } else {
+                    suggestionsEl.classList.add('d-none');
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (e.target !== inputEl && e.target !== suggestionsEl) {
+                    suggestionsEl.classList.add('d-none');
+                }
+            });
+        }
+    }
+
+    setupAutocomplete('stateInput', 'stateSuggestions', indianStates);
+    setupAutocomplete('cityInput', 'citySuggestions', popularCities);
+
+    // Profile Preview
+    function previewProfileImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('profilePreview').src = e.target.result; }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // View Switcher
+    function switchView(viewId, element) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        document.getElementById(viewId + '-view').classList.add('active');
+        if(element) element.classList.add('active');
+
+        if(viewId === 'messages') {
+            const chatBox = document.getElementById("chatBox");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    function filterTable(status, btnElement) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        const rows = document.querySelectorAll('.order-row');
+        rows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status').toLowerCase();
+            const filter = status.toLowerCase();
+            if (filter === 'all') { row.style.display = ''; }
+            else if (filter === 'return') { row.style.display = rowStatus.includes('return') ? '' : 'none'; }
+            else { row.style.display = rowStatus === filter ? '' : 'none'; }
+        });
+    }
+
+    // Chat Logic
+    function sendMessage() {
+        const input = document.getElementById("userMsg");
+        const msg = input.value.trim();
+        const farmerSelect = document.getElementById("farmerSelect");
+
+        if (!farmerSelect.value) { alert("Please select a farmer to message first!"); return; }
+        if (!msg) return;
+
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<div class="msg-bubble msg-user animate__animated animate__fadeInUp">${msg}</div>`;
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const typingId = 'typing-' + Date.now();
+        chatBox.innerHTML += `<div class="msg-bubble msg-bot text-muted fst-italic" id="${typingId}"><small>Typing...</small></div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        fetch("", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: new URLSearchParams({
+                'action_type': 'send_chat_message',
+                'recipient': farmerSelect.value,
+                'message': msg
+            })
+        }).then(response => {
+            document.getElementById(typingId).remove();
+            if (response.ok) {
+                const botReply = `✅ Message successfully sent to ${farmerSelect.value}!`;
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot animate__animated animate__fadeInUp">${botReply}</div>`;
+            } else {
+                chatBox.innerHTML += `<div class="msg-bubble msg-bot text-danger">Failed to send message.</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    }
+    function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
+
+    // Dynamic Smart Buyer Insights
+    const customerInsights = [
+        { text: "Seasonal Alert: Fresh Mangoes are at peak sweetness right now. Buy local!", icon: "fas fa-lemon text-warning" },
+        { text: "Price Drop: Tomatoes are 15% cheaper this week due to high local harvest.", icon: "fas fa-tag text-white" },
+        { text: "Freshness Tip: Root vegetables ordered today guarantee prompt delivery.", icon: "fas fa-carrot text-white" },
+        { text: "Eco-Impact: Buying locally sourced greens saves 2kg of CO2 per order!", icon: "fas fa-leaf text-success" },
+        { text: "Stock Alert: Organic honey is selling out fast in your area.", icon: "fas fa-archive text-white" }
+    ];
+
+    let insightIndex = 0;
+    setInterval(() => {
+        insightIndex = (insightIndex + 1) % customerInsights.length;
+        const insightTextEl = document.getElementById('insightText');
+        const insightIconEl = document.getElementById('insightIcon');
+
+        if(insightTextEl && insightIconEl) {
+            insightTextEl.style.opacity = 0;
+            insightIconEl.style.opacity = 0;
+            setTimeout(() => {
+                insightTextEl.innerText = customerInsights[insightIndex].text;
+                insightIconEl.className = `${customerInsights[insightIndex].icon} me-1 opacity-100`;
+                insightTextEl.style.opacity = 1;
+                insightIconEl.style.opacity = 1;
+            }, 300);
+        }
+    }, 5000);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

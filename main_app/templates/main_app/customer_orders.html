@@ -1,0 +1,32 @@
+{% extends 'main_app/base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>My Orders</h2>
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Item</th>
+                <th>Farmer</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.date_ordered|date:"M d, Y" }}</td>
+                <td>{{ order.crop.name }}</td>
+                <td>{{ order.farmer.user.first_name }}</td>
+                <td>₹{{ order.total_price }}</td>
+                <td>
+                    <a href="{% url 'download_bill' order.id %}" target="_blank" class="btn btn-primary btn-sm">
+                        <i class="fas fa-download"></i> Bill
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

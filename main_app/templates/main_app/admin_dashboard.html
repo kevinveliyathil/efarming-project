@@ -1,0 +1,1681 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    /* === 1. THEME VARIABLES (FARMER DASHBOARD STYLE) === */
+    :root {
+        /* Backgrounds */
+        --bg-body: #F3F4F6;
+        --sidebar-bg: #111827;
+        --card-bg: #FFFFFF;
+        --input-bg: #F9FAFB;
+        --hover-bg: #E5E7EB;
+        --sidebar-hover: rgba(255, 255, 255, 0.05);
+        --header-glass: rgba(255, 255, 255, 0.9);
+
+        /* Text */
+        --text-main: #1F2937;
+        --text-secondary: #6B7280;
+        --text-sidebar: #9CA3AF;
+        --text-sidebar-active: #FFFFFF;
+
+        /* Borders & Shadows */
+        --border-color: #E5E7EB;
+        --shadow-card: 0px 4px 20px rgba(0, 0, 0, 0.03);
+
+        /* Brand Colors - EMERALD GREEN */
+        --brand-accent: #10B981;
+        --brand-contrast: #FFFFFF;
+        --brand-dark: #059669;
+
+        /* Status Colors */
+        --success-green: #10B981;
+        --warning-orange: #F59E0B;
+        --danger-red: #EF4444;
+
+        /* UI */
+        --border-radius: 16px;
+        --transition: all 0.3s ease-in-out;
+    }
+
+    /* === 2. DARK MODE OVERRIDES (PURE BLACK) === */
+    [data-theme="dark"] {
+        --bg-body: #000000;
+        --sidebar-bg: #0A0A0A;
+        --card-bg: #141414;
+        --input-bg: #222222;
+        --hover-bg: #333333;
+        --text-main: #FFFFFF;
+        --text-secondary: #A3A3A3;
+        --border-color: #2A2A2A;
+        --shadow-card: 0px 8px 25px rgba(0, 0, 0, 0.8);
+    }
+
+    /* === CUSTOM UTILITY CLASSES FOR THEME SWITCHING === */
+    .theme-bg-body { background-color: var(--bg-body) !important; }
+    .theme-bg-card { background-color: var(--card-bg) !important; }
+    .theme-bg-input { background-color: var(--input-bg) !important; }
+    .theme-text-main { color: var(--text-main) !important; }
+    .theme-text-sec { color: var(--text-secondary) !important; }
+    .theme-border { border-color: var(--border-color) !important; }
+
+    /* Hover helper for clear all button */
+    .hover-danger:hover { color: var(--danger-red) !important; }
+
+    body {
+        background-color: var(--bg-body);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
+        overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* === 3. LIVE AMBIENT BACKGROUND === */
+    .live-bg {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: -1; overflow: hidden; pointer-events: none;
+    }
+    .orb {
+        position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+        animation: floatOrb 12s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 400px; height: 400px; background: rgba(16, 185, 129, 0.25); top: -100px; left: -100px; }
+    .orb-2 { width: 500px; height: 500px; background: rgba(59, 130, 246, 0.15); bottom: -150px; right: -100px; animation-delay: -3s; animation-duration: 15s; }
+    .orb-3 { width: 300px; height: 300px; background: rgba(245, 158, 11, 0.15); top: 40%; left: 40%; animation-delay: -6s; animation-duration: 10s; }
+
+    @keyframes floatOrb {
+        0% { transform: translateY(0) translateX(0) scale(1); }
+        100% { transform: translateY(50px) translateX(50px) scale(1.1); }
+    }
+
+    .dashboard-wrapper { display: flex; min-height: 100vh; }
+
+    /* === 4. TOAST ALERTS === */
+    .alert {
+        position: fixed; top: 25px; right: 25px; z-index: 99999;
+        min-width: 320px; padding: 16px 20px; border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); color: white;
+        backdrop-filter: blur(10px);
+        animation: slideInRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .alert-success { background: linear-gradient(135deg, rgba(16,185,129,0.9), rgba(5,150,105,0.9)); }
+    @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* === 5. SIDEBAR === */
+    .admin-sidebar {
+        min-height: 100vh;
+        background-color: var(--sidebar-bg);
+        width: 260px;
+        position: fixed; left: 0; top: 0; bottom: 0; z-index: 1000;
+        display: flex; flex-direction: column; padding: 30px 20px;
+        transition: var(--transition);
+        border-right: none;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    }
+
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-left: 10px; text-decoration: none; }
+    .brand-icon { font-size: 1.8rem; color: var(--brand-accent); transform: rotate(-10deg); }
+    .brand-text { font-size: 1.6rem; font-weight: 800; color: #FFFFFF; letter-spacing: -0.5px; }
+
+    .nav-label { font-size: 0.75rem; font-weight: 700; color: #6B7280; text-transform: uppercase; margin: 0 0 15px 15px; letter-spacing: 1px; }
+
+    .nav-link {
+        color: var(--text-sidebar); font-weight: 600; padding: 12px 20px;
+        border-radius: 10px; margin-bottom: 5px; display: flex; align-items: center; gap: 15px;
+        transition: var(--transition); font-size: 0.95rem; cursor: pointer; text-decoration: none;
+        border-right: 4px solid transparent;
+    }
+    .nav-link i { width: 20px; text-align: center; font-size: 1.1rem; color: var(--text-sidebar); transition: var(--transition); }
+
+    .nav-link:hover { background-color: var(--sidebar-hover); color: var(--text-sidebar-active); }
+    .nav-link:hover i { color: var(--brand-accent); }
+
+    .nav-link.active { background-color: rgba(16, 185, 129, 0.15); color: var(--text-sidebar-active); font-weight: 800; border-right: 4px solid var(--brand-accent); }
+    .nav-link.active i { color: var(--brand-accent); filter: drop-shadow(0 0 5px rgba(16,185,129,0.5)); }
+
+    .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .logout-btn {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        padding: 12px; border: 1px solid rgba(239, 68, 68, 0.5); color: var(--danger-red);
+        border-radius: 15px; text-decoration: none; font-weight: 700; transition: var(--transition); width: 100%;
+    }
+    .logout-btn:hover { background: var(--danger-red); color: white; border-color: var(--danger-red); }
+
+    /* === 6. MAIN CONTENT & SEAMLESS HEADER === */
+    .main-content { margin-left: 260px; width: calc(100% - 260px); display: flex; flex-direction: column; min-height: 100vh; }
+
+    .top-header {
+        padding: 30px 30px 10px 30px;
+        display: flex; justify-content: space-between; align-items: center;
+        z-index: 900; background: transparent; border: none;
+    }
+
+    .header-icons { display: flex; align-items: center; gap: 20px; }
+    .icon-btn {
+        width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: var(--text-secondary); background: transparent; border: none; font-size: 1.2rem; transition: var(--transition); cursor: pointer;
+    }
+    .icon-btn:hover { background: var(--hover-bg); color: var(--brand-accent); }
+
+    .user-profile-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--brand-accent); }
+
+    /* === 7. CUSTOM DROPDOWNS === */
+    .custom-dropdown-menu {
+        width: 300px;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        background: var(--card-bg);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        margin-top: 15px !important;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        display: none;
+        z-index: 9999;
+        animation: fadeIn 0.2s ease-in-out;
+    }
+    .custom-dropdown-menu.show-menu { display: block !important; }
+
+    .dropdown-header-user { padding: 20px 25px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border-color); }
+    .dropdown-header-user h6 { color: var(--text-main); margin: 0; }
+
+    .dropdown-item { padding: 12px 25px; font-size: 0.9rem; font-weight: 500; color: var(--text-main); display: flex; align-items: center; transition: 0.2s; cursor: pointer; text-decoration: none; }
+    .dropdown-item:hover { background-color: var(--hover-bg); color: var(--brand-accent); padding-left: 30px; }
+    .dropdown-item i { width: 20px; margin-right: 15px; color: var(--text-secondary); }
+    .dropdown-item:hover i { color: var(--brand-accent); }
+
+    .dropdown-divider { border-top: 1px solid var(--border-color); opacity: 1; margin: 8px 0; }
+
+    /* === 8. DASHBOARD CARDS === */
+    .dashboard-body { padding: 0 30px 30px 30px; }
+
+    .stat-card-new {
+        background: var(--card-bg); border-radius: var(--border-radius); padding: 20px;
+        display: flex; align-items: center; gap: 20px; box-shadow: var(--shadow-card);
+        transition: var(--transition); border: 1px solid var(--border-color); height: 100%;
+    }
+    .stat-card-new:hover { transform: translateY(-5px); border-color: var(--brand-accent); box-shadow: 0 10px 20px rgba(16,185,129,0.1); }
+
+    .icon-box-stat { width: 70px; height: 70px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+    .box-green { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .box-blue { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+    .box-purple { background: rgba(139, 92, 246, 0.15); color: #8B5CF6; }
+    .box-orange { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+
+    .stat-content { display: flex; flex-direction: column; justify-content: center; }
+    .stat-label { font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1; letter-spacing: -0.5px; }
+
+    .content-card {
+        background: var(--card-bg); border-radius: var(--border-radius); padding: 30px;
+        box-shadow: var(--shadow-card); height: 100%; margin-bottom: 30px; border: 1px solid var(--border-color);
+    }
+    .card-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin: 0; }
+    .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;}
+
+    /* === 9. TABLES === */
+    .custom-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+    .custom-table th { text-align: left; color: var(--text-secondary); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; padding: 0 20px; letter-spacing: 0.5px; }
+    .custom-table td {
+        background: var(--card-bg); padding: 20px; color: var(--text-main); font-weight: 600;
+        border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); font-size: 0.95rem;
+    }
+    .custom-table tr td:first-child { border-left: 1px solid var(--border-color); border-top-left-radius: 15px; border-bottom-left-radius: 15px; }
+    .custom-table tr td:last-child { border-right: 1px solid var(--border-color); border-top-right-radius: 15px; border-bottom-right-radius: 15px; }
+    .custom-table tr:hover td { background: var(--hover-bg); }
+
+    .status-badge { padding: 6px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #10B981; }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+
+    /* === 10. TABS & MODALS === */
+    .modal-content { background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
+    .modal-header { border-bottom: 1px solid var(--border-color); }
+    .form-control, .form-select { background-color: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); padding: 10px 15px; border-radius: 10px; }
+    .form-control:focus { background-color: var(--card-bg); color: var(--text-main); border-color: var(--brand-accent); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+    [data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .farmer-grid-card {
+        background: var(--card-bg); border-radius: 20px; padding: 30px; text-align: center;
+        box-shadow: var(--shadow-card); transition: 0.3s; border: 1px solid var(--border-color); height: 100%;
+    }
+    .farmer-grid-card:hover { transform: translateY(-5px); border-bottom: 5px solid var(--brand-accent); box-shadow: 0 10px 20px rgba(16,185,129,0.1); }
+
+    .btn-brand { background-color: var(--brand-accent); color: var(--brand-contrast); border: none; font-weight: 700; transition: 0.2s; }
+    .btn-brand:hover { background-color: var(--brand-dark); color: var(--brand-contrast); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16,185,129,0.3); }
+</style>
+
+{% if messages %}
+<div id="messages-alert-container" style="position: fixed; top: 25px; right: 25px; z-index: 99999;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} shadow-sm d-flex align-items-center gap-2 mb-2" style="border-radius: 12px; background: white; color: #1F2937; border-left: 5px solid {% if message.tags == 'success' %}#10B981{% else %}#EF4444{% endif %};">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle text-success{% else %}fa-exclamation-circle text-danger{% endif %} fs-5"></i>
+        <span class="fw-bold">{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="live-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+</div>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+
+        <div class="col-auto admin-sidebar d-none d-md-flex">
+            <a href="{% url 'home' %}" class="sidebar-brand">
+                <i class="fas fa-leaf brand-icon"></i>
+                <span class="brand-text">eFarming</span>
+            </a>
+
+            <div class="sidebar-profile text-center mb-4">
+                <img src="{% if user.adminprofile and user.adminprofile.profile_photo %}{{ user.adminprofile.profile_photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|default:user.username|default:'Admin' }}&background=10B981&color=fff{% endif %}" class="rounded-circle shadow-sm" width="80" height="80" style="object-fit:cover; border: 3px solid var(--brand-accent) !important;">
+                <div class="mt-3">
+                    <h6 class="mb-0 fw-bold text-white">{{ user.first_name|default:"Admin" }} {{ user.last_name }}</h6>
+                    <small class="text-white-50 fw-bold">@{{ user.username }}</small>
+                </div>
+            </div>
+
+            <div class="nav flex-column mb-auto">
+                <div class="nav-label">Main Dashboard</div>
+                <a class="nav-link active" onclick="showTab('overview', this)" id="nav-overview"><i class="fas fa-home"></i> <span>Overview</span></a>
+                <a class="nav-link" onclick="showTab('network', this)" id="nav-network"><i class="fas fa-users"></i> <span>Farmer Network</span></a>
+                <a class="nav-link" onclick="showTab('customers', this)" id="nav-customers"><i class="fas fa-user-friends"></i> <span>Consumers</span></a>
+                <a class="nav-link" onclick="showTab('inventory', this)" id="nav-inventory"><i class="fas fa-boxes"></i> <span>Global Inventory</span></a>
+                <a class="nav-link" onclick="showTab('approvals', this)" id="nav-approvals"><i class="fas fa-check-circle"></i>
+                    <span class="d-flex justify-content-between w-100">Approvals
+                        {% if pending_approvals > 0 %}<span style="background: var(--danger-red); color: white; padding: 2px 8px; border-radius: 6px; font-size: 0.7em;">{{ pending_approvals }}</span>{% endif %}
+                    </span>
+                </a>
+                <a class="nav-link" onclick="showTab('phtests', this)" id="nav-phtests"><i class="fas fa-flask"></i>
+                    <span class="d-flex justify-content-between w-100">pH Requests
+                        {% if ph_requests.count > 0 %}
+                        <span style="background: var(--warning-orange); color: #000; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; font-weight: bold;">{{ ph_requests.count }}</span>
+                        {% endif %}
+                    </span>
+                </a>
+                <a class="nav-link" onclick="showTab('payouts', this)" id="nav-payouts"><i class="fas fa-wallet"></i> <span>Payouts</span></a>
+                <a class="nav-link" onclick="showTab('inbox', this)" id="nav-inbox"><i class="fas fa-envelope-open-text"></i>
+                    <span class="d-flex justify-content-between w-100">Inbox
+                        {% if suggestions.count > 0 %}<span style="background: var(--brand-accent); color: var(--brand-contrast); padding: 2px 8px; border-radius: 6px; font-size: 0.7em;">{{ suggestions.count }}</span>{% endif %}
+                    </span>
+                </a>
+                <a class="nav-link" onclick="showTab('settings', this)" id="nav-settings"><i class="fas fa-cog"></i> <span>Site Settings</span></a>
+            </div>
+
+            <div class="sidebar-footer">
+                <a href="{% url 'logout' %}" class="logout-btn"><span>Log Out</span><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+
+        <div class="main-content">
+
+            <header class="top-header">
+                <div></div>
+
+                <div class="header-icons ms-auto">
+
+                    <div class="dropdown" style="position: relative;">
+                        <button class="icon-btn" onclick="toggleDropdown('weatherDropdown', event)" title="Weather Updates">
+                            <i class="fas fa-cloud-sun text-warning"></i>
+                        </button>
+                        <div id="weatherDropdown" class="custom-dropdown-menu p-4 theme-bg-card theme-border">
+                            <h6 class="fw-bold theme-text-main mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.8rem;">Current Weather</h6>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div>
+                                    <div class="theme-text-main fw-bold" style="font-size: 2.5rem; line-height: 1;">26°</div>
+                                    <div class="theme-text-sec fw-bold">Mostly Sunny</div>
+                                </div>
+                                <i class="fas fa-cloud-sun text-warning" style="font-size: 3rem; filter: drop-shadow(0 5px 15px rgba(245, 158, 11, 0.3));"></i>
+                            </div>
+                            <div class="theme-text-sec small mb-3"><i class="fas fa-map-marker-alt text-danger me-1"></i> Kerala, IN</div>
+                            <div class="d-flex justify-content-between small fw-bold theme-text-sec border-top theme-border pt-3 mt-2">
+                                <span><i class="fas fa-tint text-primary me-1"></i> 78%</span>
+                                <span><i class="fas fa-wind text-info me-1"></i> 12 km/h</span>
+                                <span><i class="fas fa-umbrella text-secondary me-1"></i> 20%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dropdown" style="position: relative;">
+                        <button class="icon-btn position-relative" onclick="toggleDropdown('notificationDropdown', event)" title="Notifications">
+                            <i class="far fa-bell"></i>
+                            {% if pending_approvals > 0 or ph_requests.count > 0 or suggestions.count > 0 or active_subsidies_count > 0 %}
+                            <span id="main-bell-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 10px; height: 10px;"></span>
+                            {% endif %}
+                        </button>
+                        <div id="notificationDropdown" class="custom-dropdown-menu p-0 overflow-hidden theme-border" style="width: 320px;">
+
+                            <div class="p-3 border-bottom theme-border theme-bg-input d-flex justify-content-between align-items-center">
+                                <h6 class="fw-bold theme-text-main mb-0 text-uppercase" style="letter-spacing: 0.5px; font-size: 0.85rem;">Notifications</h6>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if pending_approvals > 0 or ph_requests.count > 0 or suggestions.count > 0 or active_subsidies_count > 0 %}
+                                        <span id="notif-new-badge" class="badge bg-danger rounded-pill">New</span>
+                                        <a href="#" id="clear-all-btn" class="text-decoration-none text-muted fw-bold ms-1 hover-danger" style="font-size: 0.75rem; transition: 0.2s;" onclick="clearNotifications(event)">Clear All</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div id="notificationList" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                                {% if active_subsidies_count > 0 %}
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action theme-bg-card theme-border py-3 text-decoration-none" style="transition: 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'" onclick="showTab('payouts', document.querySelector('.nav-link[onclick*=\'payouts\']')); toggleDropdown('notificationDropdown', event);">
+                                    <div class="d-flex gap-3">
+                                        <div class="icon-circle bg-success bg-opacity-10 text-success" style="width:40px; height:40px; font-size:1.1rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:50%;"><i class="fas fa-hand-holding-usd"></i></div>
+                                        <div>
+                                            <h6 class="mb-1 theme-text-main fw-bold" style="font-size: 0.95rem;">{{ active_subsidies_count }} Active Subsidies</h6>
+                                            <small class="theme-text-sec">Govt grants currently processed.</small>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if pending_approvals > 0 %}
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action theme-bg-card theme-border py-3 text-decoration-none" style="transition: 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'" onclick="showTab('approvals', document.querySelector('.nav-link[onclick*=\'approvals\']')); toggleDropdown('notificationDropdown', event);">
+                                    <div class="d-flex gap-3">
+                                        <div class="icon-circle bg-danger bg-opacity-10 text-danger" style="width:40px; height:40px; font-size:1.1rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:50%;"><i class="fas fa-user-clock"></i></div>
+                                        <div>
+                                            <h6 class="mb-1 theme-text-main fw-bold" style="font-size: 0.95rem;">{{ pending_approvals }} Pending Approvals</h6>
+                                            <small class="theme-text-sec">New farmers await verification.</small>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if ph_requests.count > 0 %}
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action theme-bg-card theme-border py-3 text-decoration-none" style="transition: 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'" onclick="showTab('phtests', document.querySelector('.nav-link[onclick*=\'phtests\']')); toggleDropdown('notificationDropdown', event);">
+                                    <div class="d-flex gap-3">
+                                        <div class="icon-circle bg-warning bg-opacity-10 text-warning" style="width:40px; height:40px; font-size:1.1rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:50%;"><i class="fas fa-flask"></i></div>
+                                        <div>
+                                            <h6 class="mb-1 theme-text-main fw-bold" style="font-size: 0.95rem;">{{ ph_requests.count }} Lab Requests</h6>
+                                            <small class="theme-text-sec">Soil samples require input.</small>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if suggestions.count > 0 %}
+                                <a href="javascript:void(0)" class="list-group-item list-group-item-action theme-bg-card theme-border py-3 text-decoration-none" style="transition: 0.2s;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--card-bg)'" onclick="showTab('inbox', document.querySelector('.nav-link[onclick*=\'inbox\']')); toggleDropdown('notificationDropdown', event);">
+                                    <div class="d-flex gap-3">
+                                        <div class="icon-circle bg-info bg-opacity-10 text-info" style="width:40px; height:40px; font-size:1.1rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:50%;"><i class="fas fa-envelope"></i></div>
+                                        <div>
+                                            <h6 class="mb-1 theme-text-main fw-bold" style="font-size: 0.95rem;">{{ suggestions.count }} Unread Messages</h6>
+                                            <small class="theme-text-sec">Check your support comlink.</small>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endif %}
+
+                                {% if pending_approvals == 0 and ph_requests.count == 0 and suggestions.count == 0 and active_subsidies_count == 0 %}
+                                <div class="text-center py-5 theme-text-sec theme-bg-card">
+                                    <i class="far fa-bell-slash mb-3 fa-3x opacity-25"></i>
+                                    <h6 class="fw-bold mb-0">You're all caught up!</h6>
+                                    <small class="opacity-75">No new alerts to review.</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="far fa-moon"></i></button>
+
+                    <div class="dropdown" style="position: relative;">
+                        <a href="#" class="d-flex align-items-center text-decoration-none" onclick="toggleDropdown('profileDropdown', event)">
+                            <img src="{% if user.adminprofile and user.adminprofile.profile_photo %}{{ user.adminprofile.profile_photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|default:user.username|default:'Admin' }}&background=10B981&color=fff{% endif %}" class="user-profile-img">
+                        </a>
+
+                        <ul id="profileDropdown" class="custom-dropdown-menu list-unstyled m-0">
+                            <li>
+                                <div class="dropdown-header-user">
+                                    <img src="{% if user.adminprofile and user.adminprofile.profile_photo %}{{ user.adminprofile.profile_photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|default:user.username|default:'Admin' }}&background=10B981&color=fff{% endif %}" class="rounded-circle" width="50" height="50" style="object-fit:cover;">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold theme-text-main">{{ user.first_name|default:"Admin" }} {{ user.last_name }} <span class="badge bg-success text-white ms-2" style="font-size:0.6rem;">ADMIN</span></h6>
+                                        <small class="theme-text-sec">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileSettingsModal" onclick="toggleDropdown('profileDropdown', event)">
+                                    <i class="fas fa-user-edit"></i> Edit Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#securityModal" onclick="toggleDropdown('profileDropdown', event)">
+                                    <i class="fas fa-shield-alt"></i> Security & Password
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-body">
+                <div id="tab-overview" class="tab-content active">
+                    <div class="page-title-box"><div class="page-title fw-bold theme-text-sec">Pages / Dashboard</div><h1 class="page-heading fw-bold mb-4 theme-text-main">Main Overview</h1></div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-green"><i class="fas fa-coins"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">TOTAL REVENUE</div>
+                                    <div class="stat-value">₹{{ total_revenue|default:0|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-blue"><i class="fas fa-shopping-basket"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">TOTAL ORDERS</div>
+                                    <div class="stat-value">{{ total_orders }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-purple"><i class="fas fa-tractor"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">FARMERS</div>
+                                    <div class="stat-value">{{ total_farmers }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-orange"><i class="fas fa-users"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">CONSUMERS</div>
+                                    <div class="stat-value">{{ total_customers }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-8">
+                            <div class="content-card">
+                                <div class="card-header-flex">
+                                    <h4 class="card-title">Revenue Analytics</h4>
+                                    <button class="btn btn-brand btn-sm rounded-pill px-3">This Year</button>
+                                </div>
+                                <div style="height: 300px;"><canvas id="salesChart"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4">
+                            <div class="content-card theme-bg-card theme-border">
+                                <h4 class="mb-4 card-title"><i class="fas fa-fire text-warning me-2"></i>Top Harvests</h4>
+
+                                {% for crop in top_crops %}
+                                <div class="d-flex align-items-center mb-3 p-3 rounded-4 theme-bg-input theme-border" style="border: 1px solid; transition: 0.3s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                                    {% if crop.image %}
+                                        <img src="{{ crop.image.url }}" class="rounded-circle me-3" style="width: 45px; height: 45px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle me-3 d-flex align-items-center justify-content-center bg-success text-white fw-bold" style="width: 45px; height: 45px; font-size: 1.2rem;">
+                                            {{ crop.name|slice:":1" }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold theme-text-main">{{ crop.name }}</div>
+                                        <div style="font-size: 0.85rem;" class="theme-text-sec">{{ crop.total_sold|default:0 }} kg sold</div>
+                                    </div>
+                                    <div class="ms-auto fw-bold fs-5 text-success">₹{{ crop.price_per_kg }}/kg</div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-4 theme-text-sec">
+                                    <i class="fas fa-seedling fa-2x mb-2 opacity-50"></i>
+                                    <p class="small mb-0 fw-bold">No sales data recorded yet.</p>
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header-flex"><h4 class="card-title">Recent Transactions</h4></div>
+                        <table class="custom-table">
+                            <thead class="theme-bg-input"><tr><th>Order ID</th><th>Customer</th><th>Crop</th><th>Amount</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td class="fw-bold theme-text-main">#{{ order.id }}</td>
+                                    <td class="theme-text-main">{{ order.customer.user.first_name }}</td>
+                                    <td class="theme-text-main">{{ order.crop.name }}</td>
+                                    <td class="text-success fw-bold">₹{{ order.total_price }}</td>
+                                    <td><span class="status-badge badge-success"><i class="fas fa-check-circle"></i> Paid</span></td>
+                                </tr>
+                                {% empty %}<tr><td colspan="5" class="text-center theme-text-sec py-4">No recent orders found.</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-network" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Farmer Network</h2>
+                    <div class="row">
+                        {% for farmer in farmers %}
+                        {% if farmer.is_approved %}
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-4 farmer-card-item">
+                            <div class="farmer-grid-card d-flex flex-column align-items-center">
+                                {% if farmer.profile_photo %}
+                                    <img src="{{ farmer.profile_photo.url }}" class="rounded-circle mb-3 border-success shadow-sm" style="width:100px; height:100px; object-fit:cover; border: 3px solid var(--brand-accent) !important;">
+                                {% else %}
+                                    <div class="rounded-circle mb-3 mx-auto d-flex align-items-center justify-content-center theme-bg-input text-success shadow-sm" style="width:100px; height:100px; font-size:2.5rem; font-weight:bold; border: 3px solid var(--brand-accent);">
+                                        {{ farmer.user.first_name|slice:":1" }}
+                                    </div>
+                                {% endif %}
+                                <h5 class="fw-bold fs-5 mb-1 theme-text-main">{{ farmer.user.first_name }} {{ farmer.user.last_name }}</h5>
+
+                                <p class="theme-text-sec small mb-2"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ farmer.location|default:farmer.area|default:"Location Not Set" }}</p>
+
+                                <div class="mb-3 text-center w-100">
+                                    <span class="badge theme-bg-input theme-text-sec border theme-border px-2 py-1 mb-2 d-inline-block">
+                                        <i class="fas fa-chart-area"></i> {{ farmer.land_area|default:"0.00" }} Acres
+                                    </span>
+                                    <br>
+                                    {% if farmer.land_area >= 5 %}
+                                        {% if farmer.next_subsidy_date %}
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1 mb-1">
+                                                <i class="fas fa-calendar-alt"></i> Next Due: {{ farmer.next_subsidy_date|date:"M d, Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 mb-1">
+                                                <i class="fas fa-check-circle"></i> Subsidy Eligible
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1 mb-1">
+                                            <i class="fas fa-times-circle"></i> Not Eligible
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-flex flex-column gap-2 w-100 mt-auto">
+                                    <div class="d-flex gap-2 w-100">
+                                        <button class="btn btn-brand btn-sm rounded-pill w-100 fw-bold" data-bs-toggle="modal" data-bs-target="#farmerProfileModal{{ farmer.id }}">
+                                            <i class="fas fa-user me-1"></i> View
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill w-100 fw-bold border theme-border" data-bs-toggle="modal" data-bs-target="#deleteFarmerModal{{ farmer.id }}">
+                                            <i class="fas fa-trash-alt me-1"></i> Delete
+                                        </button>
+                                    </div>
+
+                                    {% if farmer.land_area >= 5 %}
+                                    <button class="btn btn-success btn-sm w-100 rounded-pill fw-bold mt-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#subsidyModal{{ farmer.id }}">
+                                        <i class="fas fa-hand-holding-usd me-1"></i> Grant & Schedule
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="deleteFarmerModal{{ farmer.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-sm">
+                                <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                    <div class="modal-body p-0">
+                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                            <i class="fas fa-user-times"></i>
+                                        </div>
+                                        <h4 class="fw-bold theme-text-main mb-2">Delete Farmer?</h4>
+                                        <p class="theme-text-sec mb-4">Are you sure you want to permanently delete <strong>{{ farmer.user.first_name }}</strong> from the network?</p>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                            <a href="{% url 'delete_farmer' farmer.id %}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='network';">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="farmerProfileModal{{ farmer.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content theme-bg-card theme-border rounded-4 shadow">
+                                    <div class="modal-header border-bottom-0 pb-0">
+                                        <h5 class="modal-title fw-bold theme-text-main">Farmer Profile</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-4">
+                                        <div class="text-center mb-4">
+                                            {% if farmer.profile_photo %}
+                                                <img src="{{ farmer.profile_photo.url }}" class="rounded-circle shadow-sm" style="width:100px; height:100px; object-fit:cover; border: 3px solid var(--brand-accent);">
+                                            {% else %}
+                                                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center theme-bg-input text-success shadow-sm" style="width:100px; height:100px; font-size:2.5rem; font-weight:bold; border: 3px solid var(--brand-accent);">
+                                                    {{ farmer.user.first_name|slice:":1" }}
+                                                </div>
+                                            {% endif %}
+                                            <h4 class="fw-bold mt-3 mb-1 theme-text-main">{{ farmer.user.get_full_name }}</h4>
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 border border-success">Verified Partner</span>
+                                        </div>
+
+                                        <div class="theme-bg-input p-3 rounded-4 theme-border" style="border: 1px solid;">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="theme-text-sec small fw-bold text-uppercase">Username</span>
+                                                <span class="theme-text-main fw-bold">@{{ farmer.user.username }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="theme-text-sec small fw-bold text-uppercase">Email</span>
+                                                <span class="theme-text-main fw-bold">{{ farmer.user.email }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="theme-text-sec small fw-bold text-uppercase">Contact</span>
+                                                <span class="theme-text-main fw-bold">{{ farmer.phone_number|default:farmer.phone_no|default:"N/A" }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <span class="theme-text-sec small fw-bold text-uppercase">Location</span>
+                                                <span class="theme-text-main fw-bold text-end" style="max-width: 60%;">{{ farmer.location|default:farmer.area|default:"N/A" }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-3">
+                                                <span class="theme-text-sec small fw-bold text-uppercase">Soil pH Status</span>
+                                                <span class="theme-text-main fw-bold">{{ farmer.soil_ph_level|default:"Not Tested" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="subsidyModal{{ farmer.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content theme-bg-card theme-border rounded-4 shadow">
+                                    <form action="{% url 'grant_subsidy' farmer.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <div class="modal-header border-bottom-0 pb-0">
+                                            <h5 class="modal-title fw-bold theme-text-main"><i class="fas fa-file-invoice-dollar text-success me-2"></i> Subsidy Authorization</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-4">
+                                            <div class="theme-bg-input p-4 rounded-4 theme-border mb-4" style="border: 1px solid;">
+                                                <div class="text-center mb-3 border-bottom theme-border pb-3">
+                                                    <h6 class="fw-bold theme-text-sec text-uppercase mb-1" style="letter-spacing: 1px;">Official Grant Invoice</h6>
+                                                    <h3 class="fw-bold text-success mb-0">₹5,000.00</h3>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="theme-text-sec small fw-bold text-uppercase">Beneficiary</span>
+                                                    <span class="theme-text-main fw-bold">{{ farmer.user.get_full_name }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="theme-text-sec small fw-bold text-uppercase">Registered Area</span>
+                                                    <span class="theme-text-main fw-bold">{{ farmer.land_area }} Acres</span>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="theme-text-sec small fw-bold text-uppercase">Sector</span>
+                                                    <span class="theme-text-main fw-bold text-end">{{ farmer.location|default:farmer.area|default:"Location Not Set" }}</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="theme-text-sec small fw-bold text-uppercase">Status</span>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success">Verified Eligible</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="theme-bg-input p-3 rounded-4 theme-border mb-3" style="border: 1px solid;">
+                                                <label class="small fw-bold theme-text-main mb-2 d-block">Schedule Next Disbursement Date <span class="text-danger">*</span></label>
+                                                <input type="date" name="next_subsidy_date" class="form-control form-control-custom bg-white" required>
+                                                <div class="form-text small opacity-75 mt-2"><i class="fas fa-bell text-warning"></i> You will be notified on this date to release the next funds.</div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                                            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold theme-text-main theme-border" style="border: 1px solid; background: transparent;" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                                                <i class="fas fa-check me-1"></i> Authorize & Schedule
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% endif %}
+                        {% empty %}
+                        <div class="col-12 text-center py-5"><h5 class="theme-text-sec"><i class="fas fa-users-slash mb-2 d-block fa-2x"></i>No active farmers.</h5></div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="tab-customers" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Consumer Directory</h2>
+                    <div class="content-card">
+                        <table class="custom-table align-middle">
+                            <thead class="theme-bg-input">
+                                <tr><th class="ps-4">Buyer Identity</th><th>Contact Data</th><th>Status</th><th class="text-end pe-4">Action</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if customer.profile_photo %}
+                                                <img src="{{ customer.profile_photo.url }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ customer.user.first_name }}&background=10B981&color=fff'" class="rounded-circle shadow-sm" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--brand-accent);">
+                                            {% else %}
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px; border: 2px solid transparent;">
+                                                    {{ customer.user.first_name|slice:":1" }}
+                                                </div>
+                                            {% endif %}
+
+                                            <div>
+                                                <div class="fw-bold theme-text-main">{{ customer.user.first_name }} {{ customer.user.last_name }}</div>
+                                                <div class="small theme-text-sec">{{ customer.user.email }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold theme-text-main"><i class="fas fa-phone-alt text-muted me-2 small"></i>{{ customer.phone_number }}</td>
+                                    <td><span class="status-badge badge-success"><i class="fas fa-check"></i> Active</span></td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-brand btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#viewCustomerModal{{ customer.id }}">
+                                                <i class="fas fa-eye me-1"></i> View
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#deleteCustomerModal{{ customer.id }}">
+                                                <i class="fas fa-trash-alt me-1"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="viewCustomerModal{{ customer.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content theme-bg-card theme-border rounded-4 shadow">
+                                            <div class="modal-header border-bottom-0 pb-0">
+                                                <h5 class="modal-title fw-bold theme-text-main">Consumer Profile</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="text-center mb-4">
+                                                    {% if customer.profile_photo %}
+                                                        <img src="{{ customer.profile_photo.url }}" class="rounded-circle shadow-sm" style="width:100px; height:100px; object-fit:cover; border: 3px solid var(--brand-accent);">
+                                                    {% else %}
+                                                        <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center theme-bg-input text-success shadow-sm" style="width:100px; height:100px; font-size:2.5rem; font-weight:bold; border: 3px solid var(--brand-accent);">
+                                                            {{ customer.user.first_name|slice:":1" }}
+                                                        </div>
+                                                    {% endif %}
+                                                    <h4 class="fw-bold mt-3 mb-1 theme-text-main">{{ customer.user.first_name }} {{ customer.user.last_name }}</h4>
+                                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 border border-success">Active Consumer</span>
+                                                </div>
+
+                                                <div class="theme-bg-input p-3 rounded-4 theme-border" style="border: 1px solid;">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="theme-text-sec small fw-bold text-uppercase">Username</span>
+                                                        <span class="theme-text-main fw-bold">@{{ customer.user.username }}</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="theme-text-sec small fw-bold text-uppercase">Email</span>
+                                                        <span class="theme-text-main fw-bold">{{ customer.user.email }}</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="theme-text-sec small fw-bold text-uppercase">Contact</span>
+                                                        <span class="theme-text-main fw-bold">{{ customer.phone_number|default:"N/A" }}</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span class="theme-text-sec small fw-bold text-uppercase">Address</span>
+                                                        <span class="theme-text-main fw-bold text-end" style="max-width: 60%;">{{ customer.address|default:"N/A" }}</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-3">
+                                                        <span class="theme-text-sec small fw-bold text-uppercase">State</span>
+                                                        <span class="theme-text-main fw-bold text-end" style="max-width: 60%;">{{ customer.state|default:"N/A" }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="deleteCustomerModal{{ customer.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                                        <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                            <div class="modal-body p-0">
+                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                    <i class="fas fa-user-times"></i>
+                                                </div>
+                                                <h4 class="fw-bold theme-text-main mb-2">Delete Consumer?</h4>
+                                                <p class="theme-text-sec mb-4">Are you sure you want to permanently delete <strong>{{ customer.user.first_name }}</strong> from the platform?</p>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="{% url 'delete_customer' customer.id %}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='customers';">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr><td colspan="4" class="text-center py-5 theme-text-sec">No Buyers Found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-inventory" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Global Inventory Overview</h2>
+
+                    {% regroup all_crops by farmer as grouped_inventory %}
+
+                    {% for group in grouped_inventory %}
+                        <div class="content-card mb-4">
+                            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom theme-border">
+                                {% if group.grouper.profile_photo %}
+                                    <img src="{{ group.grouper.profile_photo.url }}" class="rounded-circle shadow-sm border border-2 border-success" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm border border-2 border-success" style="width: 50px; height: 50px;">
+                                        {{ group.grouper.user.first_name|slice:":1" }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <h5 class="fw-bold theme-text-main mb-0">{{ group.grouper.user.get_full_name }}</h5>
+                                    <small class="theme-text-sec"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ group.grouper.area|default:"Location Not Set" }}</small>
+                                </div>
+                                <div class="ms-auto badge bg-success bg-opacity-10 text-success border border-success">{{ group.list|length }} Active Listings</div>
+                            </div>
+
+                            <div class="row g-3">
+                                {% for crop in group.list %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="d-flex align-items-center p-3 rounded-4 theme-bg-input theme-border border">
+                                        {% if crop.image %}
+                                            <img src="{{ crop.image.url }}" class="rounded-3 me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-3 me-3 d-flex align-items-center justify-content-center bg-light text-muted" style="width: 60px; height: 60px;">
+                                                <i class="fas fa-leaf"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold theme-text-main mb-1">{{ crop.name }}</div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge {% if crop.quantity_kg > 0 %}bg-info bg-opacity-10 text-info{% else %}bg-danger bg-opacity-10 text-danger{% endif %} border border-opacity-25">
+                                                    Stock: {{ crop.quantity_kg }} kg
+                                                </span>
+                                                <span class="fw-bold text-success">₹{{ crop.price_per_kg }}/kg</span>
+                                            </div>
+                                        </div>
+                                        <div class="ms-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" style="width: 35px; height: 35px;" data-bs-toggle="modal" data-bs-target="#deleteCropModal{{ crop.id }}" title="Delete Listing">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="deleteCropModal{{ crop.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                                        <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                            <div class="modal-body p-0">
+                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </div>
+                                                <h4 class="fw-bold theme-text-main mb-2">Remove Listing?</h4>
+                                                <p class="theme-text-sec mb-4">Are you sure you want to remove <strong>{{ crop.name }}</strong> from the platform?</p>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{% url 'admin_delete_crop' crop.id %}" method="POST" class="d-inline">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='inventory';">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="content-card text-center py-5 theme-text-sec">
+                            <i class="fas fa-boxes fa-3x mb-3 opacity-25"></i>
+                            <h5>No inventory found.</h5>
+                            <p class="small opacity-75">Farmers haven't listed any crops yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div id="tab-approvals" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Pending Approvals</h2>
+                    <div class="content-card">
+                        {% if pending_approvals > 0 %}
+                        <table class="custom-table align-middle">
+                            <thead class="theme-bg-input">
+                                <tr>
+                                    <th class="ps-4">Farmer Details</th>
+                                    <th>Location</th>
+                                    <th>Farm Details</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for farmer in farmers %}
+                                    {% if not farmer.is_approved %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                {% if farmer.profile_photo %}
+                                                    <img src="{{ farmer.profile_photo.url }}" class="rounded-circle shadow-sm border border-success" style="width: 40px; height: 40px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 40px; height: 40px;">
+                                                        {{ farmer.user.first_name|slice:":1" }}
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <div class="fw-bold theme-text-main">{{ farmer.user.first_name }} {{ farmer.user.last_name }}</div>
+                                                    <div class="small theme-text-sec">{{ farmer.user.email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="theme-text-main"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ farmer.location|default:farmer.area|default:"Not Provided" }}</td>
+                                        <td>
+                                            <span class="badge theme-bg-input theme-text-sec border theme-border px-2 py-1">
+                                                <i class="fas fa-chart-area"></i> {{ farmer.land_area|default:"0.00" }} Acres
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-flex gap-2 justify-content-end">
+                                                <form action="{% url 'approve_farmer' farmer.id %}" method="POST" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 fw-bold" onclick="window.location.hash='approvals';">
+                                                        <i class="fas fa-check-circle me-1"></i> Approve
+                                                    </button>
+                                                </form>
+
+                                                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#rejectFarmerModal{{ farmer.id }}">
+                                                    <i class="fas fa-times-circle me-1"></i> Reject
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <div class="modal fade" id="rejectFarmerModal{{ farmer.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                                            <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                                <div class="modal-body p-0">
+                                                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                        <i class="fas fa-user-times"></i>
+                                                    </div>
+                                                    <h4 class="fw-bold theme-text-main mb-2">Reject Application?</h4>
+                                                    <p class="theme-text-sec mb-4">Are you sure you want to reject and delete the application for <strong>{{ farmer.user.first_name }}</strong>?</p>
+                                                    <div class="d-flex gap-2 justify-content-center">
+                                                        <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                                        <form action="{% url 'reject_farmer' farmer.id %}" method="POST" class="d-inline">
+                                                            {% csrf_token %}
+                                                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='approvals';">Reject</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-center py-5 theme-text-sec">
+                            <i class="fas fa-check-circle fa-4x mb-3 opacity-25 text-success"></i>
+                            <h4 class="fw-bold mb-1">No pending approvals!</h4>
+                            <p class="opacity-75">All farmer registrations have been processed and you are all caught up.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="tab-phtests" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Soil pH Test Requests</h2>
+                    <div class="content-card">
+                        <table class="custom-table align-middle">
+                            <thead class="theme-bg-input">
+                                <tr>
+                                    <th>Farmer Data</th>
+                                    <th>Allocation Details</th>
+                                    <th>Field Data</th>
+                                    <th>Update Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ph_req in ph_requests %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            {% if ph_req.farmer.profile_photo %}
+                                                <a href="#" data-bs-toggle="modal" data-bs-target="#phProfilePicModal{{ ph_req.id }}">
+                                                    <img src="{{ ph_req.farmer.profile_photo.url }}" class="rounded-circle shadow-sm" style="width: 45px; height: 45px; object-fit: cover; border: 2px solid var(--brand-accent);">
+                                                </a>
+
+                                                <div class="modal fade" id="phProfilePicModal{{ ph_req.id }}" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content bg-transparent border-0 shadow-none">
+                                                            <div class="modal-body text-center position-relative p-0">
+                                                                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1050; filter: invert(1) grayscale(100%) brightness(200%);"></button>
+                                                                <img src="{{ ph_req.farmer.profile_photo.url }}" class="img-fluid rounded-4 shadow-lg" style="max-height: 80vh; border: 4px solid white;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 45px; height: 45px; border: 2px solid var(--brand-accent);">
+                                                    {{ ph_req.farmer.user.first_name|slice:":1" }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-bold theme-text-main">{{ ph_req.farmer.user.get_full_name|default:ph_req.farmer.user.username }}</div>
+                                                <small class="theme-text-sec"><i class="fas fa-phone-alt me-1"></i> {{ ph_req.contact_number }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold theme-text-main">{{ ph_req.sampling_location }}</div>
+                                        <span class="status-badge badge-pending"><i class="fas fa-clock me-1"></i> {{ ph_req.booking_date|date:"M d" }} | {{ ph_req.booking_time }}</span>
+                                        <div class="small fw-bold mt-1 text-primary"><i class="fas fa-user-tag me-1"></i> {{ ph_req.assigned_agent }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if ph_req.soil_photo %}
+                                            <a href="{{ ph_req.soil_photo.url }}" target="_blank">
+                                                <img src="{{ ph_req.soil_photo.url }}" class="rounded-3 theme-border border-success" style="border: 2px solid; width: 50px; height: 50px; object-fit: cover; cursor: pointer;">
+                                            </a>
+                                            {% else %}
+                                            <div class="rounded-3 theme-bg-input d-flex align-items-center justify-content-center theme-text-sec theme-border" style="border: 1px solid; width: 50px; height: 50px;"><i class="fas fa-image"></i></div>
+                                            {% endif %}
+
+                                            {% if ph_req.notes %}
+                                            <button class="btn btn-sm theme-bg-input theme-border text-primary" style="border: 1px solid;" title="{{ ph_req.notes }}"><i class="fas fa-file-alt"></i></button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td style="width: 320px;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <form action="{% url 'update_ph_level' ph_req.id %}" method="POST" class="d-flex gap-2 flex-grow-1">
+                                                {% csrf_token %}
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text theme-bg-input theme-border border-end-0 fw-bold text-primary">pH</span>
+                                                    <input type="number" step="0.1" min="0" max="14" name="ph_result" class="form-control border-start-0" placeholder="e.g. 6.5" required>
+                                                </div>
+                                                <button type="submit" class="btn btn-sm btn-brand rounded-3 px-3">Update</button>
+                                            </form>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-3 px-2" data-bs-toggle="modal" data-bs-target="#deletePhReqModal{{ ph_req.id }}" title="Delete Request">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="modal fade" id="deletePhReqModal{{ ph_req.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-sm">
+                                                <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                                    <div class="modal-body p-0">
+                                                        <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </div>
+                                                        <h4 class="fw-bold theme-text-main mb-2">Delete Request?</h4>
+                                                        <p class="theme-text-sec mb-4">Are you sure you want to delete this pH test request from <strong>{{ ph_req.farmer.user.first_name }}</strong>?</p>
+                                                        <div class="d-flex gap-2 justify-content-center">
+                                                            <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                                            <form action="{% url 'delete_ph_request' ph_req.id %}" method="POST" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='phtests';">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center theme-text-sec py-5">
+                                        <i class="fas fa-flask fa-3x mb-3 opacity-25 text-primary"></i>
+                                        <h5>No pending pH test requests.</h5>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-payouts" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Financial Ledger & Payouts</h2>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-blue"><i class="fas fa-money-check-alt"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">PENDING PAYOUTS</div>
+                                    <div class="stat-value">{{ pending_payouts_count|default:"0" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-green"><i class="fas fa-check-double"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">TOTAL DISBURSED</div>
+                                    <div class="stat-value">₹{{ total_disbursed|default:"0.00" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-card-new">
+                                <div class="icon-box-stat box-purple"><i class="fas fa-hand-holding-usd"></i></div>
+                                <div class="stat-content">
+                                    <div class="stat-label">SUBSIDIES ACTIVE</div>
+                                    <div class="stat-value">{{ active_subsidies_count|default:"0" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card mb-4">
+                        <div class="card-header-flex">
+                            <h4 class="card-title text-warning"><i class="fas fa-clock me-2"></i>Pending Withdrawal Requests</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table align-middle">
+                                <thead class="theme-bg-input">
+                                    <tr>
+                                        <th class="ps-4">Farmer Info</th>
+                                        <th>Bank Details</th>
+                                        <th>Amount Requested</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for payout in payout_requests %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold theme-text-main">{{ payout.farmer.user.get_full_name }}</div>
+                                            <div class="small theme-text-sec">{{ payout.date_requested|date:"M d, Y" }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold theme-text-main">HDFC Bank</div>
+                                            <div class="small theme-text-sec">Acct ending in 8821</div>
+                                        </td>
+                                        <td class="fw-bold text-dark">₹{{ payout.amount }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"><i class="fas fa-check me-1"></i> Approve</button>
+                                            <button class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1"><i class="fas fa-times"></i></button>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="4" class="text-center py-4 theme-text-sec">No pending withdrawal requests.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header-flex">
+                            <h4 class="card-title text-success"><i class="fas fa-history me-2"></i>Recent Disbursals & Subsidies</h4>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table align-middle">
+                                <thead class="theme-bg-input">
+                                    <tr>
+                                        <th class="ps-4">Transaction ID</th>
+                                        <th>Beneficiary</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for farmer in active_subsidies %}
+                                    <tr>
+                                        <td class="ps-4 fw-bold font-monospace theme-text-sec">#SUB-{{ farmer.id }}</td>
+                                        <td class="fw-bold theme-text-main">{{ farmer.user.get_full_name }}</td>
+                                        <td><span class="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1"><i class="fas fa-hand-holding-usd"></i> Govt Subsidy</span></td>
+                                        <td class="fw-bold text-success">₹5,000.00</td>
+                                        <td><span class="status-badge badge-success"><i class="fas fa-check"></i> Processed</span></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="5" class="text-center py-4 theme-text-sec">No recent subsidy or disbursal transactions.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-inbox" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Admin Inbox</h2>
+                    <div class="content-card">
+                        {% if suggestions %}
+                            <div class="list-group list-group-flush">
+                                {% for msg in suggestions %}
+                                <div class="list-group-item p-4 border-0 mb-3 rounded-4 shadow-sm theme-bg-input">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="d-flex gap-3">
+                                            {% if msg.farmer.profile_photo %}
+                                                <img src="{{ msg.farmer.profile_photo.url }}" class="rounded-circle theme-border shadow-sm" style="width: 50px; height: 50px; object-fit: cover; border: 2px solid var(--brand-accent) !important;">
+                                            {% else %}
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center theme-border fw-bold fs-4 shadow-sm" style="width: 50px; height: 50px; border: 2px solid var(--brand-accent) !important;">
+                                                    {{ msg.farmer.user.first_name|slice:":1"|upper }}
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="fw-bold mb-1 theme-text-main">{{ msg.farmer.user.first_name }} {{ msg.farmer.user.last_name }}</h6>
+                                                <small class="theme-text-sec d-block mb-3">
+                                                    <i class="fas fa-clock me-1"></i> {{ msg.date_sent|timesince }} ago
+                                                </small>
+                                                <p class="mb-0 theme-text-main fw-medium" style="font-size: 0.95rem;">{{ msg.message }}</p>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteMsgModal{{ msg.id }}">
+                                            <i class="fas fa-trash me-1"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="deleteMsgModal{{ msg.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-sm">
+                                        <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4 theme-bg-card theme-border">
+                                            <div class="modal-body p-0">
+                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                                    <i class="fas fa-trash"></i>
+                                                </div>
+                                                <h4 class="fw-bold theme-text-main mb-2">Delete Message?</h4>
+                                                <p class="theme-text-sec mb-4">Are you sure you want to delete this message from <strong>{{ msg.farmer.user.first_name }}</strong>?</p>
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    <button type="button" class="btn btn-light border rounded-pill px-4 fw-bold text-dark" data-bs-dismiss="modal">Cancel</button>
+                                                    <a href="{% url 'delete_suggestion' msg.id %}" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="window.location.hash='inbox';">Delete</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="p-5 text-center theme-text-sec">
+                                <i class="fas fa-envelope-open-text fa-3x mb-3 opacity-25"></i>
+                                <h5>No new messages</h5>
+                                <p class="small opacity-75">When farmers contact support, their messages will appear here.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div id="tab-settings" class="tab-content">
+                    <h2 class="mb-4 page-heading fw-bold theme-text-main">Site Settings</h2>
+
+                    <div class="content-card">
+                        <div class="card-header-flex">
+                            <h4 class="card-title text-success"><i class="fas fa-address-book me-2"></i>Contact Us Details</h4>
+                        </div>
+
+                        <form action="{% url 'update_site_settings' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="small fw-bold theme-text-sec mb-2">Location Address</label>
+                                    <input type="text" name="location" list="location-options" class="form-control p-3 rounded-3 theme-bg-input theme-border theme-text-main" value="{{ site_settings.location|default:'Kerala, India' }}" required>
+
+                                    <datalist id="location-options">
+                                        <option value="Ernakulam, Kerala, India">
+                                        <option value="Thiruvananthapuram, Kerala, India">
+                                        <option value="Kozhikode, Kerala, India">
+                                        <option value="Thrissur, Kerala, India">
+                                        <option value="Kollam, Kerala, India">
+                                        <option value="Palakkad, Kerala, India">
+                                        <option value="Kottayam, Kerala, India">
+                                        <option value="Kannur, Kerala, India">
+                                        <option value="Alappuzha, Kerala, India">
+                                        <option value="Idukki, Kerala, India">
+                                        <option value="Wayanad, Kerala, India">
+                                    </datalist>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold theme-text-sec mb-2">Support Email</label>
+                                    <input type="email" name="email" class="form-control p-3 rounded-3 theme-bg-input theme-border theme-text-main" value="{{ site_settings.email|default:'support@efarming.com' }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold theme-text-sec mb-2">Phone Number</label>
+                                    <input type="text" name="phone" class="form-control p-3 rounded-3 theme-bg-input theme-border theme-text-main" value="{{ site_settings.phone|default:'+91 98765 43210' }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="small fw-bold theme-text-sec mb-2">Working Hours</label>
+                                    <input type="text" name="working_hours" id="working_hours" list="hours-options" class="form-control p-3 rounded-3 theme-bg-input theme-border theme-text-main" value="{{ site_settings.working_hours|default:'Mon-Sun: 7AM - 10PM' }}" required>
+
+                                    <datalist id="hours-options">
+                                        <option value="Mon-Sun: 7AM - 10PM">
+                                        <option value="Tue-Sun: 7AM - 10PM">
+                                        <option value="Wed-Sun: 7AM - 10PM">
+                                        <option value="Sat-Sun: 7AM - 10PM">
+                                        <option value="Mon-Fri: 9AM - 6PM">
+                                        <option value="Mon-Sat: 8AM - 8PM">
+                                        <option value="24/7 Support Available">
+                                    </datalist>
+                                </div>
+
+                                <div class="col-12 mt-4 pt-2">
+                                    <button type="submit" class="btn btn-brand rounded-pill px-5 py-3 fw-bold shadow-sm">
+                                        <i class="fas fa-save me-2"></i> Save Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="profileSettingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow theme-bg-card theme-border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold theme-text-main">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'update_admin_profile' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="d-flex flex-column align-items-center mb-4">
+                        <img src="{% if user.adminprofile and user.adminprofile.profile_photo %}{{ user.adminprofile.profile_photo.url }}{% else %}https://ui-avatars.com/api/?name={{ user.first_name|default:user.username|default:'Admin' }}&background=10B981&color=fff{% endif %}" class="rounded-circle mb-3 border shadow-sm" width="100" height="100" style="object-fit:cover; border: 2px solid var(--brand-accent) !important;" id="modalProfilePreview">
+                        <label class="upload-box w-100 theme-border p-3 text-center rounded-3 theme-bg-input" style="border: 2px dashed; cursor: pointer;" for="profileUpload">
+                            <i class="fas fa-cloud-upload-alt fs-3 mb-2 text-primary"></i>
+                            <div class="small fw-bold theme-text-main">Click to upload new photo</div>
+                        </label>
+                        <input type="file" id="profileUpload" name="profile_photo" class="d-none" onchange="previewImage(this)">
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="small fw-bold theme-text-sec mb-1">First Name</label>
+                            <input type="text" name="first_name" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small fw-bold theme-text-sec mb-1">Last Name</label>
+                            <input type="text" name="last_name" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" value="{{ user.last_name }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="small fw-bold theme-text-sec mb-1">Email</label>
+                            <input type="email" name="email" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" value="{{ user.email }}">
+                        </div>
+                    </div>
+                    <div class="mt-4"><button type="submit" class="btn btn-brand w-100 rounded-pill py-3 fw-bold">Save Changes</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="securityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow theme-bg-card theme-border">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold theme-text-main"><i class="fas fa-shield-alt text-success me-2"></i> Security Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form action="{% url 'update_admin_password' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="small fw-bold theme-text-sec mb-1">Current Password</label>
+                        <input type="password" name="old_password" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" placeholder="••••••••" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold theme-text-sec mb-1">New Password</label>
+                        <input type="password" name="new_password" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" placeholder="••••••••" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="small fw-bold theme-text-sec mb-1">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-control p-3 rounded-3 fw-bold theme-bg-input theme-text-main theme-border" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-brand w-100 rounded-pill py-3 fw-bold">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // === ADDED: Force reload on back button to fix bfcache issue ===
+    window.addEventListener("pageshow", function (event) {
+        if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+            window.location.reload();
+        }
+    });
+
+    // === DYNAMIC NOTIFICATION CLEARING LOGIC ===
+    // This creates a unique "snapshot" of the current notification counts
+    const currentNotifState = "{{ pending_approvals|default:0 }}-{{ ph_requests.count|default:0 }}-{{ suggestions.count|default:0 }}-{{ active_subsidies_count|default:0 }}";
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabId = hash.replace('#', '');
+            const tabElement = document.getElementById('tab-' + tabId);
+            const navElement = document.getElementById('nav-' + tabId);
+
+            if (tabElement && navElement) {
+                document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                tabElement.classList.add('active');
+                navElement.classList.add('active');
+            }
+        }
+
+        // Check if notifications should remain cleared
+        const savedNotifState = localStorage.getItem('clearedNotifState');
+
+        // If the current counts match the counts from when they clicked "Clear All", keep them hidden
+        if (savedNotifState === currentNotifState) {
+            clearNotificationsUI();
+        } else if (savedNotifState !== null) {
+            // Data changed! (e.g. a new farmer registered). Remove the old saved state so new alerts show up.
+            localStorage.removeItem('clearedNotifState');
+        }
+    });
+
+    function clearNotifications(event) {
+        if(event) {
+            event.preventDefault();
+            event.stopPropagation(); // Keep dropdown open
+        }
+
+        // Save current exact state to localStorage so it remembers you cleared it
+        localStorage.setItem('clearedNotifState', currentNotifState);
+
+        // Update UI immediately
+        clearNotificationsUI();
+    }
+
+    function clearNotificationsUI() {
+        const notifList = document.getElementById('notificationList');
+        if(notifList) {
+            notifList.innerHTML = `
+                <div class="text-center py-5 theme-text-sec theme-bg-card">
+                    <i class="far fa-bell-slash mb-3 fa-3x opacity-25"></i>
+                    <h6 class="fw-bold mb-0">You're all caught up!</h6>
+                    <small class="opacity-75">No new alerts to review.</small>
+                </div>
+            `;
+        }
+
+        const badge = document.getElementById('notif-new-badge');
+        if(badge) badge.style.display = 'none';
+
+        const clearBtn = document.getElementById('clear-all-btn');
+        if(clearBtn) clearBtn.style.display = 'none';
+
+        const mainBadge = document.getElementById('main-bell-badge');
+        if(mainBadge) mainBadge.style.display = 'none';
+    }
+
+
+    // === BULLETPROOF DROPDOWN JS LOGIC ===
+    function toggleDropdown(dropdownId, event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const menu = document.getElementById(dropdownId);
+        const isShowing = menu.classList.contains('show-menu');
+
+        document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+            m.classList.remove('show-menu');
+        });
+
+        if (!isShowing) {
+            menu.classList.add('show-menu');
+        }
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.dropdown')) {
+            document.querySelectorAll('.custom-dropdown-menu').forEach(m => {
+                m.classList.remove('show-menu');
+            });
+        }
+    });
+
+    // === UPDATED: SET HASH IN URL WHEN TAB CLICKED ===
+    function showTab(name, el) {
+        document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById('tab-'+name).classList.add('active');
+        if(el) el.classList.add('active');
+
+        // Update URL hash without reloading the page
+        history.pushState(null, null, '#' + name);
+    }
+
+    function changeStatus(el) {
+        document.querySelectorAll('.status-check').forEach(i => i.classList.add('d-none'));
+        el.querySelector('.status-check').classList.remove('d-none');
+    }
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('modalProfilePreview').src = e.target.result; }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = themeBtn.querySelector('i');
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        if (body.getAttribute('data-theme') === 'dark') {
+            body.removeAttribute('data-theme');
+            themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon');
+            localStorage.setItem('theme', 'light');
+            updateChartGridColor('rgba(0, 0, 0, 0.05)');
+        } else {
+            body.setAttribute('data-theme', 'dark');
+            themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun');
+            localStorage.setItem('theme', 'dark');
+            updateChartGridColor('rgba(255, 255, 255, 0.05)');
+        }
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun');
+    }
+
+    // Chart with Dynamic Backend Mapping
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+    gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+    let gridColor = localStorage.getItem('theme') === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+    window.salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels_json|safe|default:"[]" }},
+            datasets: [{
+                label: 'Gross Volume (₹)',
+                data: {{ chart_data_json|safe|default:"[]" }},
+                borderColor: '#10B981',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#10B981'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { y: { grid: { borderDash: [5, 5], color: gridColor } }, x: { grid: { display: false } } }
+        }
+    });
+
+    function updateChartGridColor(color) {
+        if(window.salesChart) {
+            window.salesChart.options.scales.y.grid.color = color;
+            window.salesChart.update();
+        }
+    }
+
+    // === NEW BACKGROUND ASYNC MESSAGE DELETION LOGIC ===
+    function deleteSingleAdminMessage(url, msgId) {
+        // Run fetch request in background
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(() => {
+            // Remove item from UI instantly
+            const item = document.getElementById('admin-msg-' + msgId);
+            if (item) item.remove();
+
+            // Check if list is empty
+            const list = document.getElementById('admin-messages-list');
+            if (list && list.children.length === 0) {
+                // Keep hash and reload to show empty state beautifully
+                window.location.hash = 'inbox';
+                location.reload();
+            }
+        });
+    }
+
+    function clearAllAdminMessages() {
+        const btn = document.getElementById('confirmClearAllBtn');
+        if(btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+            btn.disabled = true;
+        }
+
+        const messages = document.querySelectorAll('[id^="admin-msg-"]');
+        let promises = [];
+
+        messages.forEach(msg => {
+            const url = msg.getAttribute('data-delete-url');
+            if (url) {
+                promises.push(fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }));
+            }
+        });
+
+        // Wait for all delete requests to finish in the background, then refresh to clear UI
+        Promise.all(promises).then(() => {
+            window.location.hash = 'inbox';
+            location.reload();
+        }).catch(err => {
+            console.error(err);
+            window.location.hash = 'inbox';
+            location.reload();
+        });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

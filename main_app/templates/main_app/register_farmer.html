@@ -1,0 +1,569 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* === THEME VARIABLES === */
+    :root {
+        --brand-accent: #10B981;
+        --brand-dark: #059669;
+        --text-main: #1F2937;
+        --text-sec: #6B7280;
+        --input-bg: #F9FAFB;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
+        overflow-x: hidden;
+        margin: 0;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Floating Back Button */
+    .back-home-btn {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+    .back-home-btn:hover {
+        transform: translateX(-5px);
+        color: var(--brand-accent);
+    }
+
+    /* === LIVE ANIMATED BACKGROUND IMAGE === */
+    .live-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .bg-image {
+        position: absolute;
+        top: -5%; left: -5%; width: 110%; height: 110%;
+        background: url('https://images.unsplash.com/photo-1592982537447-6f2b6e0a2948?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        animation: cinematicPan 25s infinite alternate linear;
+    }
+
+    .bg-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(16, 185, 129, 0.4));
+    }
+
+    @keyframes cinematicPan {
+        0% { transform: scale(1) translate(0, 0); }
+        100% { transform: scale(1.08) translate(-1%, -1%); }
+    }
+
+    /* === REGISTRATION CARD === */
+    .registration-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-radius: 24px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        width: 100%;
+        max-width: 900px;
+        padding: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, var(--brand-accent), #3B82F6);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--brand-dark);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .form-section-title::after {
+        content: ''; flex-grow: 1; height: 2px; background: #E5E7EB; border-radius: 2px;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 16px 20px;
+        border-radius: 14px;
+        background: var(--input-bg);
+        border: 2px solid #E5E7EB;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-main);
+        transition: all 0.3s ease;
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: var(--brand-accent);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .file-upload-wrapper {
+        border: 2px dashed #D1D5DB;
+        border-radius: 16px;
+        padding: 40px 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--input-bg);
+        position: relative;
+    }
+    .file-upload-wrapper:hover {
+        border-color: var(--brand-accent);
+        background: rgba(16, 185, 129, 0.05);
+    }
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    #profile-preview-box {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: none;
+        margin: 0 auto 15px auto;
+        border: 4px solid var(--brand-accent);
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+        animation: fadeIn 0.4s ease;
+    }
+
+    .btn-register {
+        background: var(--brand-accent);
+        color: white;
+        border: none;
+        padding: 18px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        border-radius: 16px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        margin-top: 20px;
+    }
+    .btn-register:hover {
+        background: var(--brand-dark);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Live Validation Feedback Space */
+    .live-feedback { margin-top: 6px; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
+
+    /* === CUSTOM POPUP TOASTS CSS === */
+    .toast-container {
+        position: fixed; top: 30px; right: 30px; z-index: 999999;
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    .custom-toast {
+        background: white; border-left: 5px solid #ef4444; padding: 16px 24px;
+        border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        display: flex; align-items: center; gap: 15px; font-weight: 700;
+        color: var(--text-main); min-width: 300px; max-width: 400px;
+        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-fade-out { animation: fadeOutRight 0.3s ease-in forwards; }
+    @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+
+</style>
+
+<div class="live-bg">
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="registration-wrapper">
+
+    <a href="{% url 'home' %}" class="back-home-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="glass-card">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 80px; height: 80px;">
+                <i class="fas fa-tractor fa-2x"></i>
+            </div>
+            <h2 class="fw-bold" style="font-size: 2.2rem; letter-spacing: -1px;">Join the Farmer Network</h2>
+            <p class="text-muted fw-medium">Register your profile to access subsidies, list crops, and manage your eFarm.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="registrationForm">
+            {% csrf_token %}
+
+            <div class="form-section-title"><i class="fas fa-user-shield"></i> 1. Account Credentials</div>
+            <div class="row g-4 mb-5">
+                {% for field in user_form %}
+                <div class="col-md-6 position-relative">
+                    <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+
+                    {% if field.name == 'first_name' or field.name == 'last_name' %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}" pattern="[A-Za-z]+" title="Only letters are allowed. No spaces or numbers." oninput="let v=this.value; this.value=v.replace(/[^A-Za-z]/g, ''); if(v!==this.value) showToast('Names can only contain letters. No spaces or numbers allowed.');">
+
+                    {% elif field.name == 'email' %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="e.g. yourname@gmail.com" required value="{{ field.value|default_if_none:'' }}" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="You must provide a valid @gmail.com address.">
+
+                    {% elif 'password' in field.name %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}" oninput="let v=this.value; this.value=v.replace(/\s/g, ''); if(v!==this.value) showToast('Spaces are not allowed in passwords.');" title="Spaces are not allowed in passwords.">
+
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}">
+                    {% endif %}
+
+                    {% if field.name == 'username' %}
+                        <div id="username-feedback" class="live-feedback"></div>
+                    {% endif %}
+
+                    {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-section-title"><i class="fas fa-leaf"></i> 2. Professional Details</div>
+            <div class="row g-4 mb-4">
+
+                {% for field in profile_form %}
+                    {% if field.name != 'id_proof' and field.name != 'land_area' and field.name != 'area' and field.name != 'state' and field.name != 'profile_photo' %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+
+                        {% if field.name == 'phone_no' or field.name == 'phone_number' %}
+                            <input type="tel" name="{{ field.name }}" class="form-control-custom" placeholder="Enter 10-digit number..." required value="{{ field.value|default_if_none:'' }}" maxlength="10" minlength="10" pattern="[0-9]{10}" title="Phone number must be exactly 10 digits." oninput="let v=this.value; this.value=v.replace(/[^0-9]/g, ''); if(v!==this.value) showToast('Phone numbers can only contain numbers.');">
+                        {% else %}
+                            <input type="text" name="{{ field.name }}" class="form-control-custom" placeholder="Enter {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}">
+                        {% endif %}
+
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="col-md-6 position-relative">
+                    <label class="form-label">State <span class="text-danger fs-6">*</span></label>
+                    <input type="text" name="state" id="stateInput" class="form-control-custom" placeholder="Select your state..." required autocomplete="off" value="{{ profile_form.state.value|default_if_none:'' }}">
+                    <ul class="list-group position-absolute w-100 shadow-sm d-none" id="stateSuggestions" style="z-index: 1050; top: 100%; max-height: 200px; overflow-y: auto; border-radius: 14px;"></ul>
+                </div>
+
+                <div class="col-md-6 position-relative">
+                    <label class="form-label">City <span class="text-danger fs-6">*</span></label>
+                    <input type="text" name="area" id="cityInput" class="form-control-custom" placeholder="Select your city..." required autocomplete="off" value="{{ profile_form.area.value|default_if_none:'' }}">
+                    <ul class="list-group position-absolute w-100 shadow-sm d-none" id="citySuggestions" style="z-index: 1050; top: 100%; max-height: 200px; overflow-y: auto; border-radius: 14px;"></ul>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Total Land Area (Acres) <span class="text-danger fs-6">*</span></label>
+                    <input type="number" step="0.01" min="0" name="land_area" class="form-control-custom" placeholder="e.g. 6.50" required value="{{ profile_form.land_area.value|default_if_none:'' }}">
+                </div>
+
+                <div class="col-md-12 mt-4">
+                    <label class="form-label">Profile Avatar <span class="text-danger fs-6">*</span></label>
+                    <div class="file-upload-wrapper">
+                        <img id="profile-preview-box" src="" alt="Profile Preview">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-success mb-3" id="upload-icon"></i>
+                        <h5 class="fw-bold mb-1" id="upload-text">Click or drag photo here</h5>
+                        <input type="file" name="profile_photo" id="profileInput" accept="image/*" required onchange="previewImage(this)">
+                    </div>
+                    {% if profile_form.profile_photo.errors %}<div class="text-danger small mt-2 fw-bold">{{ profile_form.profile_photo.errors }}</div>{% endif %}
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn-register mt-4">
+                <i class="fas fa-check-circle me-2"></i> Initialize Farmer Profile
+            </button>
+
+            <div class="text-center mt-4">
+                <span class="text-muted fw-bold small"><i class="fas fa-lock text-success me-1"></i> Your data is securely encrypted.</span>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // === CUSTOM POPUP TOAST FUNCTION ===
+    function showToast(message, type = 'error') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+
+        let icon = type === 'error' ? '<i class="fas fa-exclamation-circle text-danger fs-4"></i>' : '<i class="fas fa-check-circle text-success fs-4"></i>';
+        let borderColor = type === 'error' ? '#ef4444' : '#10B981';
+
+        toast.style.borderLeftColor = borderColor;
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+
+        container.appendChild(toast);
+
+        // Remove after 3.5 seconds
+        setTimeout(() => {
+            toast.classList.add('toast-fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // === HIJACK FORM SUBMIT TO SHOW CUSTOM POPUPS INSTEAD OF BORING BROWSER ALERTS ===
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('registrationForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault(); // Stops the default browser tooltip
+
+                // Identify the field name nicely
+                let fieldName = this.previousElementSibling ? this.previousElementSibling.innerText.replace('*', '').trim() : "This field";
+                let errorMessage = `Please fill out ${fieldName} correctly.`;
+
+                // Custom logic based on error type
+                if (this.validity.valueMissing) {
+                    errorMessage = `${fieldName} is required.`;
+                } else if (this.validity.patternMismatch) {
+                    errorMessage = this.title || `Invalid format for ${fieldName}.`;
+                } else if (this.validity.tooShort || this.validity.tooLong) {
+                    errorMessage = `${fieldName} must be exactly ${this.getAttribute('minlength')} digits.`;
+                }
+
+                showToast(errorMessage);
+
+                // Add a red glow to the invalid field temporarily
+                this.style.borderColor = '#ef4444';
+                setTimeout(() => { this.style.borderColor = ''; }, 3000);
+            });
+        });
+    });
+
+
+    // === AUTO-CLEAR USERNAME IF DJANGO RETURNS AN ERROR ===
+    {% if user_form.username.errors %}
+        document.addEventListener("DOMContentLoaded", function() {
+            const usernameField = document.getElementById('id_username');
+            if(usernameField) {
+                usernameField.value = '';
+                usernameField.focus();
+            }
+        });
+    {% endif %}
+
+    // === LIVE USERNAME AVAILABILITY CHECKER ===
+    document.addEventListener("DOMContentLoaded", function() {
+        const usernameInput = document.getElementById('id_username');
+        const feedbackDiv = document.getElementById('username-feedback');
+
+        if (usernameInput) {
+            let debounceTimer;
+            usernameInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const username = this.value.trim();
+
+                if (username.length === 0) {
+                    feedbackDiv.innerHTML = '';
+                    usernameInput.style.borderColor = '';
+                    return;
+                }
+
+                // Show spinner while typing
+                feedbackDiv.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Checking availability...</span>';
+
+                // Wait 600ms after user stops typing to check the database
+                debounceTimer = setTimeout(() => {
+                    fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+                        .then(response => {
+                            if(!response.ok) throw new Error("Endpoint not found yet");
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.is_taken) {
+                                feedbackDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-1"></i> Username already taken</span>';
+                                usernameInput.style.borderColor = '#ef4444'; // Red border
+                            } else {
+                                feedbackDiv.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Username available</span>';
+                                usernameInput.style.borderColor = '#10B981'; // Green border
+                            }
+                        })
+                        .catch(err => {
+                            feedbackDiv.innerHTML = '';
+                        });
+                }, 600);
+            });
+        }
+    });
+
+    // === PROFILE IMAGE PREVIEW ===
+    function previewImage(input) {
+        const previewBox = document.getElementById('profile-preview-box');
+        const uploadIcon = document.getElementById('upload-icon');
+        const uploadText = document.getElementById('upload-text');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewBox.src = e.target.result;
+                previewBox.style.display = 'block';
+                uploadIcon.style.display = 'none';
+                uploadText.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Photo Selected</span>';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // === EXPANDED SMART DEPENDENT AUTOCOMPLETE ===
+    const stateCityMap = {
+        "Kerala": [
+            "Thiruvananthapuram", "Kochi", "Ernakulam", "Kozhikode", "Thrissur", "Kollam",
+            "Alappuzha", "Palakkad", "Kottayam", "Malappuram", "Kannur", "Kasaragod",
+            "Pathanamthitta", "Idukki", "Wayanad", "Thalayolaparambu", "Vaikom", "Pala",
+            "Changanassery", "Ettumanoor", "Kanjirappally", "Ramapuram", "Munnar", "Vagamon",
+            "Kumarakom", "Chengannur", "Thiruvalla", "Kayamkulam", "Mavelikara", "Cherthala",
+            "Varkala", "Attingal", "Neyyattinkara", "Nedumangad", "Kottarakkara", "Punalur",
+            "Adoor", "Muvattupuzha", "Kothamangalam", "Perumbavoor", "Aluva", "Angamaly",
+            "Paravur", "Chalakkudy", "Irinjalakuda", "Kodungallur", "Chavakkad", "Guruvayur",
+            "Kunnamkulam", "Shoranur", "Ottappalam", "Ponnani", "Tirur", "Manjeri",
+            "Kondotty", "Nilambur", "Koyilandy", "Vatakara", "Thalassery", "Payyannur"
+        ],
+        "Karnataka": [
+            "Bangalore", "Mysore", "Hubli", "Mangalore", "Belagavi", "Gulbarga",
+            "Davanagere", "Bellary", "Shimoga", "Tumkur", "Udupi", "Hassan"
+        ],
+        "Maharashtra": [
+            "Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Kalyan",
+            "Aurangabad", "Navi Mumbai", "Solapur", "Kolhapur"
+        ],
+        "Tamil Nadu": [
+            "Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem",
+            "Tirunelveli", "Tiruppur", "Vellore", "Erode", "Kanyakumari", "Ooty"
+        ]
+    };
+
+    const indianStates = Object.keys(stateCityMap);
+    const stateInput = document.getElementById('stateInput');
+    const stateSuggestions = document.getElementById('stateSuggestions');
+    const cityInput = document.getElementById('cityInput');
+    const citySuggestions = document.getElementById('citySuggestions');
+
+    function setupDependentAutocomplete(inputEl, suggestionsEl, getDataArrayCallback) {
+        if (!inputEl || !suggestionsEl) return;
+
+        inputEl.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            suggestionsEl.innerHTML = '';
+
+            if (val) {
+                const dataArray = getDataArrayCallback();
+                const matches = dataArray.filter(item => item.toLowerCase().startsWith(val));
+
+                if (matches.length > 0) {
+                    suggestionsEl.classList.remove('d-none');
+                    matches.forEach(match => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item list-group-item-action fw-bold text-muted border-0 border-bottom p-3';
+                        li.style.cursor = 'pointer';
+
+                        const regex = new RegExp(`^(${val})`, "gi");
+                        li.innerHTML = match.replace(regex, "<span class='text-success'>$1</span>");
+
+                        li.addEventListener('click', function() {
+                            inputEl.value = match;
+                            suggestionsEl.classList.add('d-none');
+
+                            // Automatically clear City input if they pick a new State
+                            if (inputEl.id === 'stateInput') {
+                                cityInput.value = '';
+                                cityInput.placeholder = "Select your city...";
+                            }
+                        });
+                        suggestionsEl.appendChild(li);
+                    });
+                } else {
+                    suggestionsEl.classList.add('d-none');
+                }
+            } else {
+                suggestionsEl.classList.add('d-none');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target !== inputEl && e.target !== suggestionsEl) {
+                suggestionsEl.classList.add('d-none');
+            }
+        });
+    }
+
+    setupDependentAutocomplete(stateInput, stateSuggestions, () => indianStates);
+
+    setupDependentAutocomplete(cityInput, citySuggestions, () => {
+        const currentState = stateInput.value;
+        return stateCityMap[currentState] || [];
+    });
+
+    // Prompt user to select state first
+    cityInput.addEventListener('focus', function() {
+        if (!stateInput.value || !stateCityMap[stateInput.value]) {
+            this.placeholder = "Please select a valid State first";
+        } else {
+            this.placeholder = "Select your city...";
+        }
+    });
+
+</script>
+{% endblock %}

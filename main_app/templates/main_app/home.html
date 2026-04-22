@@ -1,0 +1,801 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+<style>
+/* =========================================
+   PREMIUM THEME VARIABLES
+   ========================================= */
+:root {
+    --primary-dark: #1A3C34;    /* Deep Forest Green */
+    --primary-light: #2D6A4F;   /* Lush Green */
+    --accent-color: #E07A5F;    /* Terracotta / Orange for CTAs */
+    --accent-hover: #D06346;
+    --bg-cream: #F7F5F0;        /* Organic Paper look */
+    --bg-white: #FFFFFF;
+    --text-dark: #1D1D1F;
+    --text-muted: #6E6E73;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --shadow-card: 0 20px 40px -10px rgba(26, 60, 52, 0.1);
+    --shadow-hover: 0 30px 60px -15px rgba(26, 60, 52, 0.2);
+    --shadow-glow: 0 0 30px rgba(224, 122, 95, 0.3);
+}
+
+/* =========================================
+   GLOBAL RESET & TYPOGRAPHY
+   ========================================= */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+}
+
+.content-wrapper, main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+body {
+    font-family: 'Manrope', sans-serif;
+    background-color: var(--bg-white);
+    color: var(--text-dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    color: var(--primary-dark);
+}
+
+/* =========================================
+   MODERN NAVBAR STYLING
+   ========================================= */
+.home-navbar {
+    background: transparent;
+    padding: 20px 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 1030;
+    transition: all 0.4s ease;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+.home-navbar .navbar-brand {
+    font-family: 'Playfair Display', serif;
+    font-weight: 800;
+    font-size: 1.8rem;
+    color: white !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 0;
+}
+
+.home-navbar .navbar-brand i { color: var(--accent-color); font-size: 1.6rem; }
+.home-navbar .navbar-nav { align-items: center; gap: 8px; }
+
+.home-navbar .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 10px 20px !important;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.home-navbar .nav-link:hover { color: white !important; background: rgba(255, 255, 255, 0.1); transform: translateY(-1px); }
+
+.home-navbar .dropdown-menu { border: none; border-radius: 15px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); padding: 15px; margin-top: 10px; min-width: 200px; border: 1px solid rgba(0, 0, 0, 0.05); }
+.home-navbar .dropdown-item { padding: 12px 20px; border-radius: 10px; font-weight: 500; color: var(--primary-dark); }
+.home-navbar .dropdown-item:hover { background: linear-gradient(135deg, var(--primary-light), var(--primary-dark)); color: white !important; }
+
+.home-navbar .join-as-btn { background: white; color: var(--primary-dark) !important; padding: 10px 25px !important; border-radius: 25px; font-weight: 600; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+.home-navbar .join-as-btn:hover { background: var(--accent-color); color: white !important; transform: translateY(-2px); }
+
+.home-navbar .login-btn { background: transparent; color: white !important; border: 2px solid rgba(255, 255, 255, 0.5); padding: 8px 25px !important; border-radius: 25px; font-weight: 600; }
+.home-navbar .login-btn:hover { background: white; color: var(--primary-dark) !important; border-color: white; }
+
+.home-navbar .logout-btn { background: transparent; color: #ffcccc !important; border: 2px solid rgba(255, 100, 100, 0.5); padding: 8px 20px !important; border-radius: 25px; font-weight: 600; }
+.home-navbar .logout-btn:hover { background: #DC3545; color: white !important; border-color: #DC3545; }
+
+/* === USER GREETING === */
+.home-navbar .user-greeting-container { display: flex; align-items: center; gap: 10px; padding: 5px 15px; background: rgba(255,255,255,0.1); border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); }
+.home-navbar .user-greeting-text { color: white !important; font-weight: 600; font-size: 0.95rem; }
+.home-navbar .nav-profile-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid white; }
+.home-navbar .nav-profile-initials { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-color); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 2px solid white; }
+
+.home-navbar .navbar-toggler { border: none; padding: 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.1); }
+.home-navbar .navbar-toggler-icon { filter: invert(1) brightness(100); }
+
+@media (max-width: 991px) {
+    .home-navbar .navbar-collapse { background: rgba(26, 60, 52, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-top: 15px; border: 1px solid rgba(255, 255, 255, 0.1); }
+}
+
+/* =========================================
+   CUSTOM ANIMATIONS
+   ========================================= */
+@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
+
+.animate-on-scroll { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+.animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+/* =========================================
+   1. MASTER HEADER
+   ========================================= */
+.master-header { position: relative; min-height: 100vh; width: 100%; overflow: hidden; display: flex; align-items: center; background: linear-gradient(135deg, rgba(26, 60, 52, 0.95) 0%, rgba(45, 106, 79, 0.85) 50%, rgba(240, 162, 97, 0.1) 100%), url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover; background-attachment: fixed; padding-top: 80px; }
+.header-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 80%, rgba(224, 122, 95, 0.15) 0%, transparent 40%), radial-gradient(circle at 80% 20%, rgba(45, 106, 79, 0.15) 0%, transparent 40%); }
+.header-content { position: relative; z-index: 2; padding: 100px 5% 150px; max-width: 1600px; margin: 0 auto; width: 100%; }
+
+.hero-tag { display: inline-flex; align-items: center; gap: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 12px 25px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 40px; border: 1px solid rgba(255, 255, 255, 0.2); color: white; animation: float 3s ease-in-out infinite; }
+.hero-tag i { color: var(--accent-color); }
+.hero-title { font-size: 4.5rem; font-weight: 800; margin-bottom: 30px; line-height: 1.1; color: white; text-shadow: 0 5px 25px rgba(0,0,0,0.3); max-width: 800px; }
+.hero-title span { background: linear-gradient(45deg, #fff, #f4a261); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-subtitle { font-size: 1.4rem; margin-bottom: 50px; opacity: 0.9; font-weight: 300; line-height: 1.8; color: rgba(255, 255, 255, 0.9); max-width: 700px; }
+
+.search-container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 5px; border-radius: 50px; display: flex; max-width: 700px; transition: all 0.4s ease; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.search-container:focus-within { transform: scale(1.02); box-shadow: var(--shadow-glow); }
+.search-input { border: none; flex: 1; padding: 20px 35px; font-size: 1.1rem; outline: none; border-radius: 50px; background: rgba(255, 255, 255, 0.05); color: white; font-weight: 500; }
+.search-input::placeholder { color: rgba(255, 255, 255, 0.6); }
+.search-btn { background: linear-gradient(45deg, var(--accent-color), var(--accent-hover)); color: white; border: none; padding: 20px 50px; border-radius: 45px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; }
+.search-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(224, 122, 95, 0.4); }
+
+.header-cta { display: flex; gap: 20px; margin-top: 60px; flex-wrap: wrap; }
+.cta-btn-primary { padding: 18px 45px; background: linear-gradient(45deg, var(--accent-color), var(--accent-hover)); color: white; border-radius: 50px; font-weight: 700; font-size: 1.2rem; text-decoration: none; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 15px 35px rgba(224, 122, 95, 0.3); }
+.cta-btn-primary:hover { transform: translateY(-5px) scale(1.05); color: white; }
+.cta-btn-secondary { padding: 18px 45px; background: transparent; color: white; border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50px; font-weight: 700; font-size: 1.2rem; text-decoration: none; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+.cta-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: white; transform: translateY(-3px); color: white; }
+
+.floating-element { position: absolute; animation: float 6s ease-in-out infinite; z-index: 1; opacity: 0.3; }
+.floating-1 { top: 20%; left: 5%; animation-delay: 0s; } .floating-2 { top: 60%; right: 5%; animation-delay: 2s; }
+.floating-3 { bottom: 30%; left: 10%; animation-delay: 4s; } .floating-4 { top: 40%; right: 15%; animation-delay: 1s; }
+
+.scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; color: rgba(255, 255, 255, 0.6); z-index: 2; }
+.scroll-indicator i { font-size: 1.5rem; animation: float 2s ease-in-out infinite; }
+
+/* =========================================
+   2. FEATURES SECTION
+   ========================================= */
+.features-section { padding: 120px 5%; background: var(--bg-white); }
+.section-title { text-align: center; margin-bottom: 80px; }
+.section-title h2 { font-size: 3.2rem; margin-bottom: 20px; position: relative; display: inline-block; }
+.section-title h2:after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 100px; height: 4px; background: linear-gradient(90deg, var(--accent-color), var(--primary-light)); border-radius: 2px; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; max-width: 1600px; margin: 0 auto; }
+.feature-card { background: var(--bg-cream); padding: 50px 35px; border-radius: var(--radius-lg); text-align: center; transition: all 0.4s; position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+.feature-card:before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, var(--primary-light), var(--accent-color)); }
+.feature-card:hover { transform: translateY(-15px); box-shadow: var(--shadow-hover); }
+.feature-icon { width: 90px; height: 90px; background: linear-gradient(135deg, var(--primary-light), var(--primary-dark)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin: 0 auto 25px; transition: all 0.5s ease; }
+.feature-card:hover .feature-icon { transform: rotateY(180deg) scale(1.1); background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); }
+
+/* =========================================
+   3. STATS SECTION (DYNAMIC)
+   ========================================= */
+.stats-section { background: linear-gradient(135deg, var(--primary-dark), var(--primary-light)); color: white; padding: 100px 5%; position: relative; overflow: hidden; }
+.stats-section:before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; animation: shimmer 20s linear infinite; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center; max-width: 1600px; margin: 0 auto; position: relative; z-index: 2; }
+.stat-item .counter { font-size: 3.5rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 10px; display: block; }
+.stat-item p { font-size: 1.1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1.5px; }
+
+/* =========================================
+   4. FARMERS SECTION
+   ========================================= */
+.farmers-section { padding: 120px 5%; background: var(--bg-cream); }
+.farmers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px; max-width: 1600px; margin: 0 auto; }
+.farmer-card { background: white; border-radius: var(--radius-lg); overflow: hidden; position: relative; box-shadow: var(--shadow-card); transition: all 0.4s ease; border: 1px solid rgba(0,0,0,0.05); }
+.farmer-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-hover); }
+.farmer-img-container { height: 250px; background: linear-gradient(45deg, #e0e0e0, #f0f0f0); position: relative; overflow: hidden; }
+.farmer-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+.farmer-card:hover .farmer-img { transform: scale(1.15); }
+.verified-badge { position: absolute; top: 20px; right: 20px; background: var(--accent-color); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 5px; }
+.farmer-info { padding: 30px; text-align: center; }
+.farmer-name { font-size: 1.6rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 10px; }
+.farmer-location { color: var(--text-muted); font-size: 1rem; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.farmer-location i { color: var(--accent-color); }
+.view-shop-btn { display: inline-block; width: 100%; padding: 15px; background: transparent; color: var(--primary-light); border: 2px solid var(--primary-light); border-radius: 50px; font-weight: 700; text-decoration: none; transition: all 0.3s ease; text-align: center; }
+.view-shop-btn:hover { background: var(--primary-light); color: white; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(45,106,79,0.2); }
+
+/* =========================================
+   5. HOW IT WORKS
+   ========================================= */
+.how-it-works { padding: 120px 5%; background: white; }
+.steps-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 50px; max-width: 1600px; margin: 0 auto; }
+.step { text-align: center; position: relative; }
+.step-number { width: 70px; height: 70px; background: linear-gradient(135deg, var(--primary-light), var(--primary-dark)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 700; margin: 0 auto 30px; position: relative; z-index: 2; box-shadow: 0 15px 30px rgba(45,106,79,0.2); }
+.step-icon { font-size: 3rem; color: var(--primary-dark); margin-bottom: 25px; display: block; }
+.step h4 { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-dark); }
+
+/* =========================================
+   6. TESTIMONIALS (STATIC SLIDER AS REQUESTED)
+   ========================================= */
+.testimonials-section { padding: 120px 5%; background: var(--bg-cream); }
+.testimonials-wrapper { overflow: hidden; position: relative; max-width: 1600px; margin: 0 auto; padding: 20px 0; }
+
+.testimonials-wrapper::before, .testimonials-wrapper::after { content: ''; position: absolute; top: 0; width: 120px; height: 100%; z-index: 2; pointer-events: none; }
+.testimonials-wrapper::before { left: 0; background: linear-gradient(to right, var(--bg-cream) 0%, transparent 100%); }
+.testimonials-wrapper::after { right: 0; background: linear-gradient(to left, var(--bg-cream) 0%, transparent 100%); }
+
+.testimonials-track { display: flex; width: max-content; animation: scrollLeft 35s linear infinite; }
+.testimonials-track:hover { animation-play-state: paused; }
+.testimonials-group { display: flex; gap: 40px; padding-right: 40px; }
+
+.testimonial-card { width: 450px; background: white; padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); position: relative; transition: transform 0.3s ease; border: 1px solid rgba(0,0,0,0.03); }
+.testimonial-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-hover); }
+.testimonial-card:before { content: '"'; position: absolute; top: 20px; left: 20px; font-size: 5rem; font-family: 'Playfair Display', serif; color: var(--primary-light); opacity: 0.1; }
+.testimonial-text { font-size: 1.1rem; line-height: 1.8; margin-bottom: 30px; position: relative; z-index: 2; }
+.testimonial-author { display: flex; align-items: center; gap: 15px; }
+.author-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-light); }
+.author-info h5 { margin: 0; color: var(--primary-dark); font-size: 1.1rem; }
+.author-info p { margin: 5px 0 0; font-size: 0.9rem; color: var(--text-muted); }
+
+/* =========================================
+   7. SUCCESS GALLERY (DYNAMIC INFINITE SCROLL)
+   ========================================= */
+.success-gallery-section { padding: 100px 5%; background: var(--bg-white); }
+.success-wrapper { overflow: hidden; position: relative; max-width: 1600px; margin: 0 auto; padding: 20px 0; }
+
+.success-wrapper::before, .success-wrapper::after { content: ''; position: absolute; top: 0; width: 120px; height: 100%; z-index: 2; pointer-events: none; }
+.success-wrapper::before { left: 0; background: linear-gradient(to right, var(--bg-white) 0%, transparent 100%); }
+.success-wrapper::after { right: 0; background: linear-gradient(to left, var(--bg-white) 0%, transparent 100%); }
+
+.success-track { display: flex; width: max-content; animation: scrollLeft 40s linear infinite; }
+.success-track:hover { animation-play-state: paused; }
+.success-group { display: flex; gap: 30px; padding-right: 30px; }
+
+.gallery-item {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    cursor: pointer;
+    height: 300px;
+    width: 400px; /* Uniform standard size for all cards */
+    flex-shrink: 0;
+}
+.gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+.gallery-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(26, 60, 52, 0.9), transparent);
+    padding: 30px 20px 20px;
+    color: white;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+}
+.gallery-item:hover .gallery-img { transform: scale(1.1); }
+.gallery-item:hover .gallery-overlay { transform: translateY(0); }
+.gallery-overlay h4 { color: white; margin-bottom: 5px; font-size: 1.2rem; }
+.gallery-overlay p { margin: 0; font-size: 0.9rem; opacity: 0.9; }
+
+@keyframes scrollLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* =========================================
+   8. FOOTER
+   ========================================= */
+.main-footer { background: #111; color: white; padding: 80px 5% 30px; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 50px; max-width: 1600px; margin: 0 auto 50px; }
+.footer-brand h3 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 20px; color: white; }
+.footer-brand p { opacity: 0.7; font-size: 1.1rem; line-height: 1.8; }
+.social-links { display: flex; gap: 15px; margin-top: 30px; }
+.social-links a { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; transition: all 0.3s ease; text-decoration: none; }
+.social-links a:hover { background: var(--accent-color); transform: translateY(-5px); }
+.footer-links h4 { color: var(--accent-color); margin-bottom: 25px; font-size: 1.2rem; }
+.footer-links ul { list-style: none; padding: 0; margin: 0; }
+.footer-links li { margin-bottom: 15px; }
+.footer-links a { color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; }
+.footer-links a:hover { color: white; padding-left: 5px; }
+.footer-links i { color: var(--accent-color); width: 20px; }
+.footer-bottom { text-align: center; padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; }
+
+/* MEDIA QUERIES */
+@media (max-width: 1200px) { .hero-title { font-size: 3.8rem; } }
+@media (max-width: 992px) { .hero-title { font-size: 3.2rem; } .section-title h2 { font-size: 2.8rem; } .header-cta { flex-direction: column; align-items: flex-start; } .cta-btn-primary, .cta-btn-secondary { width: 100%; justify-content: center; text-align: center; } }
+@media (max-width: 768px) {
+    .master-header { min-height: auto; padding: 100px 0; }
+    .hero-title { font-size: 2.5rem; }
+    .hero-subtitle { font-size: 1.2rem; }
+    .search-container { flex-direction: column; padding: 20px; border-radius: var(--radius-lg); }
+    .search-input { margin-bottom: 15px; border-radius: var(--radius-md); }
+    .search-btn { border-radius: var(--radius-md); justify-content: center; }
+    .section-title h2 { font-size: 2.2rem; }
+    .features-grid, .farmers-grid { grid-template-columns: 1fr; }
+    .testimonial-card, .gallery-item { width: 320px; }
+    .testimonials-wrapper::before, .testimonials-wrapper::after, .success-wrapper::before, .success-wrapper::after { width: 40px; }
+}
+@media (max-width: 480px) { .hero-title { font-size: 2rem; } .feature-card, .farmer-card { padding: 30px 20px; } }
+</style>
+
+<nav class="navbar navbar-expand-lg home-navbar">
+    <div class="container-fluid px-4 px-lg-5">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-leaf fa-beat-fade"></i>
+            <span class="brand-text">eFarming</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link admin-panel" href="{% url 'admin_dashboard' %}">
+                            <i class="fas fa-user-shield"></i> Admin Panel
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if not user.is_superuser %}
+                        {% if user.farmerprofile %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'farmer_dashboard' %}">
+                                <i class="fas fa-chart-line"></i> Dashboard
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% if user.customerprofile %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'customer_dashboard' %}">
+                                <i class="fas fa-shopping-bag"></i> My Dashboard
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+
+                    <li class="nav-item d-none d-lg-block ms-3">
+                        <div class="user-greeting-container">
+                            {% if user.farmerprofile.profile_photo %}
+                                <img src="{{ user.farmerprofile.profile_photo.url }}" class="nav-profile-img">
+                            {% elif user.customerprofile.profile_photo %}
+                                <img src="{{ user.customerprofile.profile_photo.url }}" class="nav-profile-img">
+                            {% else %}
+                                <div class="nav-profile-initials">
+                                    {{ user.first_name|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <span class="user-greeting-text">Hello, {{ user.first_name|default:user.username }}</span>
+                        </div>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link logout-btn">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link login-btn" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link join-as-btn dropdown-toggle" href="#" id="joinAsDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-plus"></i> Join As
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="joinAsDropdown">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'register_farmer' %}">
+                                    <i class="fas fa-tractor text-success"></i> Farmer
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'register_customer' %}">
+                                    <i class="fas fa-shopping-basket text-primary"></i> Customer
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="master-header" id="home">
+    <div class="header-overlay"></div>
+
+    <div class="floating-element floating-1"><i class="fas fa-leaf fa-4x" style="color: rgba(255,255,255,0.2);"></i></div>
+    <div class="floating-element floating-2"><i class="fas fa-seedling fa-4x" style="color: rgba(255,255,255,0.2);"></i></div>
+    <div class="floating-element floating-3"><i class="fas fa-wheat fa-4x" style="color: rgba(255,255,255,0.2);"></i></div>
+    <div class="floating-element floating-4"><i class="fas fa-tractor fa-4x" style="color: rgba(255,255,255,0.2);"></i></div>
+
+    <div class="header-content">
+        <div class="hero-tag animate__animated animate__fadeInDown"><i class="fas fa-check-circle"></i> 100% Organic Network</div>
+        <h1 class="hero-title animate__animated animate__fadeInUp">Fresh From <span>Farm</span> <br> Straight to Your <span>Table</span></h1>
+        <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-1s">Connect directly with verified local farmers. Experience the difference of farm-fresh produce delivered to your doorstep.</p>
+
+        <form method="get" class="search-container animate__animated animate__fadeInUp animate__delay-2s" id="searchForm">
+            <input type="text" name="q" class="search-input" placeholder="Search for fresh produce..." value="{{ query|default:'' }}">
+            <button type="submit" class="search-btn"><i class="fas fa-search"></i> Find Freshness</button>
+        </form>
+
+        <div class="header-cta animate__animated animate__fadeInUp animate__delay-3s">
+            <a href="#farmers" class="cta-btn-primary"><i class="fas fa-shopping-basket"></i> Shop from Farmers</a>
+            <a href="{% url 'register_customer' %}" class="cta-btn-secondary"><i class="fas fa-user-plus"></i> Become a Consumer</a>
+        </div>
+    </div>
+
+    <div class="scroll-indicator"><p class="mb-2">Explore More</p><a href="#features" style="color: inherit;"><i class="fas fa-chevron-down"></i></a></div>
+</section>
+
+<section class="features-section" id="features">
+    <div class="section-title animate-on-scroll"><h2>Why Choose eFarming?</h2><p class="text-muted">Experience the difference of direct-from-farm freshness</p></div>
+    <div class="features-grid">
+        <div class="feature-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-tractor"></i></div><h3>Direct from Farmers</h3><p class="text-muted">Meet the faces behind your food. Every farmer is personally verified and part of our trusted community.</p></div>
+        <div class="feature-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-leaf"></i></div><h3>100% Organic Certified</h3><p class="text-muted">Chemical-free produce grown with love. We test soil and water quality to ensure purity and health.</p></div>
+        <div class="feature-card animate-on-scroll"><div class="feature-icon"><i class="fas fa-shipping-fast"></i></div><h3>Next-Day Delivery</h3><p class="text-muted">Harvested at dawn, packed with care, and delivered fresh to your kitchen within 24 hours.</p></div>
+    </div>
+</section>
+
+<section class="stats-section animate-on-scroll" id="stats">
+    <div class="stats-grid">
+        <div class="stat-item"><span class="counter" data-target="{{ total_farmers|default:'0' }}">0</span><p>Active Farmers</p></div>
+        <div class="stat-item"><span class="counter" data-target="{{ total_customers|default:'0' }}">0</span><p>Happy Families</p></div>
+        <div class="stat-item"><span class="counter" data-target="{{ satisfaction_rate|default:'98' }}">0</span><p>% Satisfaction</p></div>
+        <div class="stat-item"><span class="counter" data-target="24">0</span><p>Hour Delivery</p></div>
+    </div>
+</section>
+
+<section class="farmers-section" id="farmers">
+    <div class="section-title animate-on-scroll"><h2>Meet Our Farmers</h2><p class="text-muted">Real people growing real food with passion</p></div>
+    <div class="farmers-grid">
+        {% for farmer in farmers %}
+        <div class="farmer-card animate-on-scroll">
+            <div class="farmer-img-container">
+                {% if farmer.profile_photo %}<img src="{{ farmer.profile_photo.url }}" class="farmer-img" alt="{{ farmer.user.first_name }}">
+                {% else %}<div style="width:100%; height:100%; background: linear-gradient(45deg, #1A3C34, #2D6A4F); display:flex; align-items:center; justify-content:center; color:white; font-size:4rem; font-family:'Playfair Display';">{{ farmer.user.first_name|slice:":1" }}</div>{% endif %}
+                <div class="verified-badge"><i class="fas fa-check-circle"></i> Verified</div>
+            </div>
+            <div class="farmer-info">
+                <h3 class="farmer-name">{{ farmer.user.first_name }} {{ farmer.user.last_name }}</h3>
+                <div class="farmer-location"><i class="fas fa-map-marker-alt"></i> {{ farmer.area }}</div>
+                <div class="mb-3"><span class="badge bg-light text-dark p-2"><i class="fas fa-leaf text-success"></i> Organic Certified</span></div>
+                <a href="{% url 'farmer_shop' farmer.id %}" class="view-shop-btn">Visit Farm Shop <i class="fas fa-arrow-right ms-2"></i></a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="animate-on-scroll" style="grid-column: 1 / -1; text-align: center; padding: 50px;">
+            {% if query %}
+                <i class="fas fa-search-minus fa-4x text-muted mb-3"></i>
+                <h3 style="color: var(--accent-color);">Product Unavailable</h3>
+                <p class="text-muted">Sorry, we couldn't find any produce or farmers matching "<b>{{ query }}</b>".</p>
+                <a href="{% url 'home' %}#farmers" class="btn btn-outline-success mt-3" style="border-radius: 25px; padding: 10px 30px;">Clear Search</a>
+            {% else %}
+                <i class="fas fa-seedling fa-4x text-muted mb-3"></i>
+                <h3>No farmers found nearby.</h3>
+                <p class="text-muted">Check back later as our network grows daily!</p>
+                <a href="{% url 'register_farmer' %}" class="btn btn-success mt-3" style="border-radius: 25px; padding: 10px 30px;">Become Our First Farmer</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="how-it-works" id="how-it-works">
+    <div class="section-title animate-on-scroll"><h2>How It Works</h2><p class="text-muted">Fresh produce in three simple steps</p></div>
+    <div class="steps-container">
+        <div class="step animate-on-scroll"><div class="step-number">1</div><i class="fas fa-search step-icon"></i><h4>Browse & Select</h4><p class="text-muted">Explore fresh produce from verified local farmers in your area. Filter by organic, local, or seasonal.</p></div>
+        <div class="step animate-on-scroll"><div class="step-number">2</div><i class="fas fa-shopping-cart step-icon"></i><h4>Order & Pay Securely</h4><p class="text-muted">Add to cart and securely pay online. 100% payment protection and easy returns if not satisfied.</p></div>
+        <div class="step animate-on-scroll"><div class="step-number">3</div><i class="fas fa-truck step-icon"></i><h4>Fresh Delivery</h4><p class="text-muted">Receive farm-fresh produce at your doorstep within 24 hours. Packaging designed to keep freshness intact.</p></div>
+    </div>
+</section>
+
+<section class="testimonials-section" id="testimonials">
+    <div class="section-title animate-on-scroll">
+        <h2>What Our Community Says</h2>
+        <p class="text-muted">Real stories from real people</p>
+    </div>
+
+    <div class="testimonials-wrapper animate-on-scroll">
+        <div class="testimonials-track">
+
+            <div class="testimonials-group">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Finally, vegetables that actually taste like vegetables! The difference between store-bought and farm-fresh is night and day. My kids actually eat their greens now!"</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Priya" class="author-img"><div class="author-info"><h5>Priya Sharma</h5><p>Kochi • 2 Year Member</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Knowing my money goes directly to the farmer makes every meal feel better. The transparency and quality are unmatched. eFarming has changed how our family eats."</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/men/54.jpg" alt="Rahul" class="author-img"><div class="author-info"><h5>Rahul Menon</h5><p>Trivandrum • Farmer Partner</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Fast delivery and eco-friendly packaging! I love that they use sustainable materials. The app is so easy to use, and customer service is fantastic."</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Anjali" class="author-img"><div class="author-info"><h5>Anjali Krishnan</h5><p>Calicut • 1 Year Member</p></div></div>
+                </div>
+            </div>
+
+            <div class="testimonials-group">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Finally, vegetables that actually taste like vegetables! The difference between store-bought and farm-fresh is night and day. My kids actually eat their greens now!"</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Priya" class="author-img"><div class="author-info"><h5>Priya Sharma</h5><p>Kochi • 2 Year Member</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Knowing my money goes directly to the farmer makes every meal feel better. The transparency and quality are unmatched. eFarming has changed how our family eats."</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/men/54.jpg" alt="Rahul" class="author-img"><div class="author-info"><h5>Rahul Menon</h5><p>Trivandrum • Farmer Partner</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">"Fast delivery and eco-friendly packaging! I love that they use sustainable materials. The app is so easy to use, and customer service is fantastic."</div>
+                    <div class="testimonial-author"><img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Anjali" class="author-img"><div class="author-info"><h5>Anjali Krishnan</h5><p>Calicut • 1 Year Member</p></div></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="success-gallery-section" id="success-stories">
+    <div class="section-title animate-on-scroll">
+        <h2>Success Stories</h2>
+        <p class="text-muted">Glimpses of growth from our farming community</p>
+    </div>
+
+    <div class="success-wrapper animate-on-scroll">
+        <div class="success-track">
+
+            <div class="success-group">
+                {% for story in success_stories %}
+                    <div class="gallery-item">
+                        <img src="{{ story.image.url }}" class="gallery-img" alt="{{ story.title }}">
+                        <div class="gallery-overlay">
+                            <h4>{{ story.title }}</h4>
+                            <p>{{ story.description }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1592841200221-a6898f307baa?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Harvest">
+                        <div class="gallery-overlay">
+                            <h4>Bountiful Harvest</h4>
+                            <p>First organic tomato yield in Idukki</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Farm">
+                        <div class="gallery-overlay">
+                            <h4>Green Fields</h4>
+                            <p>Expanding organic farming in Wayanad</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Farmer">
+                        <div class="gallery-overlay">
+                            <h4>Community Growth</h4>
+                            <p>Connecting directly with buyers</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Produce">
+                        <div class="gallery-overlay">
+                            <h4>Fresh Delivery</h4>
+                            <p>Farm to table within 24 hours</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="success-group">
+                {% for story in success_stories %}
+                    <div class="gallery-item">
+                        <img src="{{ story.image.url }}" class="gallery-img" alt="{{ story.title }}">
+                        <div class="gallery-overlay">
+                            <h4>{{ story.title }}</h4>
+                            <p>{{ story.description }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1592841200221-a6898f307baa?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Harvest">
+                        <div class="gallery-overlay">
+                            <h4>Bountiful Harvest</h4>
+                            <p>First organic tomato yield in Idukki</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Farm">
+                        <div class="gallery-overlay">
+                            <h4>Green Fields</h4>
+                            <p>Expanding organic farming in Wayanad</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1589923188900-85dae523342b?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Farmer">
+                        <div class="gallery-overlay">
+                            <h4>Community Growth</h4>
+                            <p>Connecting directly with buyers</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=800&auto=format&fit=crop" class="gallery-img" alt="Produce">
+                        <div class="gallery-overlay">
+                            <h4>Fresh Delivery</h4>
+                            <p>Farm to table within 24 hours</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<footer class="main-footer">
+    <div class="footer-grid">
+        <div class="footer-brand">
+            <h3>eFarming.</h3>
+            <p>Cultivating connections, harvesting happiness. Building a sustainable future, one harvest at a time.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Quick Links</h4>
+            <ul>
+                <li><a href="#home"><i class="fas fa-chevron-right"></i> Home</a></li>
+                <li><a href="#farmers"><i class="fas fa-chevron-right"></i> Farmers</a></li>
+                <li><a href="#how-it-works"><i class="fas fa-chevron-right"></i> How It Works</a></li>
+                <li><a href="#testimonials"><i class="fas fa-chevron-right"></i> Testimonials</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>For Farmers</h4>
+            <ul>
+                <li><a href="{% url 'register_farmer' %}"><i class="fas fa-chevron-right"></i> Join as Farmer</a></li>
+                <li><a href="#success-stories"><i class="fas fa-chevron-right"></i> Success Stories</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Contact Us</h4>
+            <ul>
+                <li><a href="#"><i class="fas fa-map-marker-alt"></i> {{ contact_settings.location|default:"Kerala, India" }}</a></li>
+                <li><a href="mailto:{{ contact_settings.email|default:'support@efarming.com' }}"><i class="fas fa-envelope"></i> {{ contact_settings.email|default:"support@efarming.com" }}</a></li>
+                <li><a href="tel:{{ contact_settings.phone|default:'+919876543210' }}"><i class="fas fa-phone"></i> {{ contact_settings.phone|default:"+91 98765 43210" }}</a></li>
+                <li><a href="#"><i class="fas fa-clock"></i> {{ contact_settings.working_hours|default:"Mon-Sun: 7AM - 10PM" }}</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 eFarming Project. All Rights Reserved. | <a href="#" style="color: inherit;">Privacy Policy</a> | <a href="#" style="color: inherit;">Terms of Service</a></p>
+    </div>
+</footer>
+
+<script>
+// Intersection Observer for scroll animations
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, observerOptions);
+document.querySelectorAll('.animate-on-scroll').forEach((el) => observer.observe(el));
+
+// Counter animation
+const counters = document.querySelectorAll('.counter');
+const speed = 200;
+const startCounter = (counter) => {
+    const target = +counter.getAttribute('data-target');
+    const count = +counter.innerText;
+    const increment = target / speed;
+    if (count < target) {
+        counter.innerText = Math.ceil(count + increment);
+        setTimeout(() => startCounter(counter), 1);
+    } else {
+        counter.innerText = target;
+    }
+};
+const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            startCounter(entry.target);
+            counterObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+counters.forEach(counter => counterObserver.observe(counter));
+
+// Smooth scrolling
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+        }
+    });
+});
+
+// Parallax header
+window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const header = document.querySelector('.master-header');
+    if (header && scrolled < 1000) header.style.backgroundPositionY = `${scrolled * 0.5}px`;
+});
+
+// Search bar focus
+const searchInput = document.querySelector('.search-input');
+const searchContainer = document.querySelector('.search-container');
+if (searchInput) {
+    searchInput.addEventListener('focus', () => {
+        searchContainer.style.transform = 'scale(1.02)';
+        searchContainer.style.boxShadow = 'var(--shadow-glow)';
+    });
+    searchInput.addEventListener('blur', () => {
+        searchContainer.style.transform = 'scale(1)';
+        searchContainer.style.boxShadow = '0 20px 60px rgba(0,0,0,0.3)';
+    });
+}
+
+// Init tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+
+// Active link
+document.addEventListener('DOMContentLoaded', function() {
+    const currentLocation = location.href;
+    const menuItems = document.querySelectorAll('.home-navbar .nav-link');
+    menuItems.forEach(item => { if (item.href === currentLocation) item.classList.add('active'); });
+});
+
+// Mobile menu close
+document.addEventListener('DOMContentLoaded', function() {
+    const navLinks = document.querySelectorAll('.home-navbar .nav-link');
+    const navbarCollapse = document.querySelector('.home-navbar .navbar-collapse');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = new bootstrap.Collapse(navbarCollapse);
+                bsCollapse.hide();
+            }
+        });
+    });
+});
+
+// Auto-scroll to search results if query exists
+{% if query %}
+document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(() => {
+        const target = document.getElementById('farmers');
+        if (target) {
+            window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+        }
+    }, 300); // Slight delay ensures layout rendering finishes first
+});
+{% endif %}
+
+</script>
+
+{% endblock %}

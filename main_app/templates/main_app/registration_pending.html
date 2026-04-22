@@ -1,0 +1,201 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* === THEME VARIABLES === */
+    :root {
+        --brand-accent: #10B981;
+        --brand-dark: #059669;
+        --warning-accent: #F59E0B;
+        --text-main: #1F2937;
+        --text-sec: #6B7280;
+        --input-bg: #F9FAFB;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
+        overflow-x: hidden;
+        margin: 0;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Floating Back Button */
+    .back-home-btn {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+    .back-home-btn:hover {
+        transform: translateX(-5px);
+        color: var(--brand-accent);
+    }
+
+    /* === LIVE ANIMATED BACKGROUND IMAGE === */
+    .live-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .bg-image {
+        position: absolute;
+        top: -5%; left: -5%; width: 110%; height: 110%;
+        /* High-quality agriculture background */
+        background: url('https://images.unsplash.com/photo-1592982537447-6f2b6e0a2948?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        /* The cinematic slow pan/zoom animation */
+        animation: cinematicPan 25s infinite alternate linear;
+    }
+
+    /* Gradient overlay to make the card pop */
+    .bg-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(16, 185, 129, 0.4));
+    }
+
+    @keyframes cinematicPan {
+        0% { transform: scale(1) translate(0, 0); }
+        100% { transform: scale(1.08) translate(-1%, -1%); }
+    }
+
+    /* === STATUS CARD (GLASSMORPHISM) === */
+    .status-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-radius: 24px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        width: 100%;
+        max-width: 650px;
+        padding: 60px 50px;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    /* Top highlight ribbon */
+    .glass-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, var(--warning-accent), var(--brand-accent));
+    }
+
+    /* LIVE PULSING ICON */
+    .icon-container {
+        width: 120px;
+        height: 120px;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 30px;
+        border: 4px solid rgba(245, 158, 11, 0.3);
+        animation: pulseWarning 2s infinite;
+    }
+
+    .icon-container i {
+        font-size: 4rem;
+        color: var(--warning-accent);
+    }
+
+    @keyframes pulseWarning {
+        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(245, 158, 11, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === HOME BUTTON === */
+    .btn-action {
+        background: var(--brand-accent);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        border-radius: 50px;
+        display: inline-block;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        margin-top: 20px;
+    }
+    .btn-action:hover {
+        background: var(--brand-dark);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+    }
+
+</style>
+
+<div class="live-bg">
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+</div>
+
+<div class="status-wrapper">
+
+    <a href="{% url 'home' %}" class="back-home-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="glass-card">
+
+        <div class="icon-container">
+            <i class="fas fa-user-clock"></i>
+        </div>
+
+        <h1 class="fw-bold text-dark mb-3" style="font-size: 2.5rem; letter-spacing: -1px;">Registration Successful!</h1>
+
+        <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark fw-bold rounded-4 p-3 mb-4 d-inline-block shadow-sm">
+            <i class="fas fa-hourglass-half me-2 text-warning"></i> Your account is currently Pending Approval
+        </div>
+
+        <p class="text-muted fw-medium fs-5 mb-5 px-3">
+            An Administrator is currently reviewing your profile to ensure quality and security. You will be able to log in to the eFarming Dashboard once your account is verified!
+        </p>
+
+        <a href="{% url 'home' %}" class="btn-action">
+            <i class="fas fa-home me-2"></i> Return to Homepage
+        </a>
+
+    </div>
+</div>
+{% endblock %}

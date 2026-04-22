@@ -1,0 +1,182 @@
+{% extends 'main_app/base.html' %}
+
+{% block content %}
+<style>
+    body { background-color: #F0F2F5; font-family: 'Manrope', sans-serif; }
+
+    /* Hide everything else when printing */
+    @media print {
+        body * { visibility: hidden; }
+        .receipt-card, .receipt-card * { visibility: visible; }
+        .receipt-card { position: absolute; left: 0; top: 0; width: 100%; margin: 0; box-shadow: none; }
+        .no-print { display: none !important; }
+    }
+
+    .receipt-container {
+        max-width: 600px;
+        margin: 50px auto;
+    }
+
+    .receipt-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .receipt-header {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        padding: 40px 20px;
+        text-align: center;
+        color: white;
+    }
+    .success-icon {
+        width: 60px; height: 60px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; margin-bottom: 15px;
+    }
+
+    .order-info-bar {
+        background: #f8f9fa;
+        padding: 15px 30px;
+        border-bottom: 2px dashed #e0e0e0;
+        display: flex; justify-content: space-between;
+        font-size: 0.85rem; color: #666; font-weight: 600;
+    }
+
+    .receipt-body { padding: 30px; }
+
+    /* NEW ITEM ROW STYLE WITH IMAGE */
+    .item-row {
+        display: flex; align-items: center;
+        padding-bottom: 15px; margin-bottom: 15px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .item-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .item-img-box {
+        width: 50px; height: 50px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #f9f9f9;
+        margin-right: 15px;
+        flex-shrink: 0;
+        border: 1px solid #eee;
+    }
+    .item-img-box img { width: 100%; height: 100%; object-fit: cover; }
+    .item-icon-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; }
+
+    .item-details { flex-grow: 1; }
+    .item-name { font-weight: 700; color: #2D3436; font-size: 1rem; display: block; line-height: 1.2; }
+    .item-meta { font-size: 0.8rem; color: #888; }
+    .item-price { font-weight: 700; color: #2D3436; font-size: 1rem; }
+
+    .total-section {
+        background: #fafafa;
+        padding: 25px 30px;
+        border-top: 2px solid #eee;
+    }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: #666; }
+    .grand-total {
+        display: flex; justify-content: space-between;
+        margin-top: 15px; padding-top: 15px;
+        border-top: 1px dashed #ccc;
+        font-size: 1.3rem; font-weight: 800; color: #27ae60;
+    }
+
+    .btn-group-custom { display: flex; border-top: 1px solid #eee; }
+    .action-btn {
+        flex: 1; text-align: center; padding: 18px;
+        font-weight: 700; text-decoration: none; transition: 0.3s;
+        border: none; background: white; cursor: pointer;
+    }
+    .btn-download { color: #2D3436; border-right: 1px solid #eee; }
+    .btn-download:hover { background: #f8f9fa; color: black; }
+
+    .btn-continue { background: #2D3436; color: white; }
+    .btn-continue:hover { background: black; color: white; }
+
+</style>
+
+<div class="container receipt-container">
+    <div class="receipt-card animate__animated animate__fadeInUp">
+
+        <div class="receipt-header">
+            <div class="success-icon animate__animated animate__bounceIn">
+                <i class="fas fa-check"></i>
+            </div>
+            <h2 class="fw-bold mb-1">Payment Successful!</h2>
+            <p class="mb-0 opacity-75">Thank you for your purchase.</p>
+        </div>
+
+        <div class="order-info-bar">
+            <span>ORDER #{{ order_id }}</span>
+            <span>{% now "M d, Y" %}</span>
+        </div>
+
+        <div class="receipt-body">
+            <h6 class="text-uppercase text-muted small fw-bold mb-4">Items Purchased</h6>
+
+            {% for item in order_items %}
+            <div class="item-row">
+                <div class="item-img-box">
+                    {% if item.image %}
+                        <img src="{{ item.image }}">
+                    {% else %}
+                        <div class="item-icon-placeholder"><i class="fas fa-leaf"></i></div>
+                    {% endif %}
+                </div>
+
+                <div class="item-details">
+                    <span class="item-name">{{ item.name }}</span>
+                    <span class="item-meta">
+                        <i class="fas fa-user-circle small me-1"></i>{{ item.farmer }} <br>
+                        {{ item.qty }}kg x ₹{{ item.price }}
+                    </span>
+                </div>
+
+                <div class="item-price">₹{{ item.total }}</div>
+            </div>
+            {% empty %}
+            <p class="text-center text-muted">Receipt details unavailable.</p>
+            {% endfor %}
+        </div>
+
+        <div class="total-section">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span>₹{{ grand_total }}</span>
+            </div>
+            <div class="total-row">
+                <span>Tax</span>
+                <span>₹0.00</span>
+            </div>
+            <div class="total-row">
+                <span>Delivery</span>
+                <span class="text-success">Free</span>
+            </div>
+            <div class="grand-total">
+                <span>Total Paid</span>
+                <span>₹{{ grand_total }}</span>
+            </div>
+        </div>
+
+        <div class="btn-group-custom no-print">
+            <button onclick="window.print()" class="action-btn btn-download">
+                <i class="fas fa-file-download me-2"></i>Download Invoice
+            </button>
+            <a href="{% url 'home' %}" class="action-btn btn-continue">
+                Continue Shopping <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-3 text-muted small no-print">
+        <i class="fas fa-lock me-1"></i> Secure eFarming Transaction
+    </div>
+</div>
+{% endblock %}

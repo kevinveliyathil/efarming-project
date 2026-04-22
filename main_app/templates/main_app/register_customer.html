@@ -1,0 +1,626 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* === THEME VARIABLES (WARM AMBER FOR BUYERS) === */
+    :root {
+        --brand-accent: #F59E0B; /* Amber */
+        --brand-dark: #D97706;   /* Darker Amber */
+        --text-main: #1F2937;
+        --text-sec: #6B7280;
+        --input-bg: #F9FAFB;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: var(--text-main);
+        overflow-x: hidden;
+        margin: 0;
+        min-height: 100vh;
+        position: relative;
+    }
+
+    /* Floating Back Button */
+    .back-home-btn {
+        position: absolute;
+        top: 30px;
+        left: 40px;
+        color: white;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 10;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+    .back-home-btn:hover {
+        transform: translateX(-5px);
+        color: var(--brand-accent);
+    }
+
+    /* === LIVE ANIMATED BACKGROUND IMAGE === */
+    .live-bg {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .bg-image {
+        position: absolute;
+        top: -5%; left: -5%; width: 110%; height: 110%;
+        /* High-quality fresh market background for consumers */
+        background: url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        /* The cinematic slow pan/zoom animation */
+        animation: cinematicPan 25s infinite alternate linear;
+    }
+
+    /* Gradient overlay to make the form easily readable */
+    .bg-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.85), rgba(245, 158, 11, 0.3));
+    }
+
+    @keyframes cinematicPan {
+        0% { transform: scale(1) translate(0, 0); }
+        100% { transform: scale(1.08) translate(-1%, -1%); }
+    }
+
+    /* === REGISTRATION CARD (GLASSMORPHISM) === */
+    .registration-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        position: relative;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        border-radius: 24px;
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        width: 100%;
+        max-width: 900px;
+        padding: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .glass-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, var(--brand-accent), #EF4444);
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--brand-dark);
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .form-section-title::after {
+        content: ''; flex-grow: 1; height: 2px; background: #E5E7EB; border-radius: 2px;
+    }
+
+    /* === CUSTOM INPUTS & LIVE VALIDATION === */
+    .form-label {
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 16px 20px;
+        border-radius: 14px;
+        background: var(--input-bg);
+        border: 2px solid #E5E7EB;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-main);
+        transition: all 0.3s ease;
+    }
+
+    /* Live Focus Action */
+    .form-control-custom:focus {
+        outline: none;
+        border-color: var(--brand-accent);
+        background: #FFFFFF;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        transform: translateY(-2px);
+    }
+
+    /* Live Validation (Turns slightly amber when filled out) */
+    .form-control-custom:valid:not(:placeholder-shown) {
+        border-color: var(--brand-accent);
+        background: rgba(245, 158, 11, 0.02);
+    }
+
+    /* === FILE UPLOAD CUSTOM UI === */
+    .file-upload-wrapper {
+        border: 2px dashed #D1D5DB;
+        border-radius: 16px;
+        padding: 40px 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--input-bg);
+        position: relative;
+    }
+    .file-upload-wrapper:hover {
+        border-color: var(--brand-accent);
+        background: rgba(245, 158, 11, 0.05);
+    }
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    #profile-preview-box {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        display: none;
+        margin: 0 auto 15px auto;
+        border: 4px solid var(--brand-accent);
+        box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2);
+        animation: fadeIn 0.4s ease;
+    }
+
+    /* === SUBMIT BUTTON === */
+    .btn-register {
+        background: var(--brand-accent);
+        color: white;
+        border: none;
+        padding: 18px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        border-radius: 16px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(245, 158, 11, 0.3);
+        margin-top: 20px;
+    }
+    .btn-register:hover {
+        background: var(--brand-dark);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes popIn {
+        0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .live-feedback { margin-top: 6px; font-size: 0.85rem; font-weight: 700; transition: all 0.3s; }
+
+    /* === CUSTOM POPUP TOASTS CSS === */
+    .toast-container {
+        position: fixed; top: 30px; right: 30px; z-index: 999999;
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    .custom-toast {
+        background: white; border-left: 5px solid #ef4444; padding: 16px 24px;
+        border-radius: 12px; box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        display: flex; align-items: center; gap: 15px; font-weight: 700;
+        color: var(--text-main); min-width: 300px; max-width: 400px;
+        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-fade-out { animation: fadeOutRight 0.3s ease-in forwards; }
+    @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+</style>
+
+<div class="live-bg">
+    <div class="bg-image"></div>
+    <div class="bg-overlay"></div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+{% if registration_successful %}
+<div class="registration-wrapper">
+    <div class="glass-card text-center" style="animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-width: 600px; margin: 0 auto;">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-4" style="width: 120px; height: 120px;">
+            <i class="fas fa-check fa-4x"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-3" style="font-size: 2.2rem;">Account Created Successfully!</h2>
+        <p class="text-muted fw-medium mb-5" style="font-size: 1.1rem;">Your consumer profile has been registered. You will need to log in to access your account.</p>
+
+        <div class="d-inline-flex align-items-center bg-light rounded-pill px-4 py-3 border">
+            <i class="fas fa-circle-notch fa-spin text-warning fs-5 me-3"></i>
+            <span class="text-dark fw-bold">Redirecting to Home page...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Automatically redirect to the home page after 1.5 seconds
+    setTimeout(function() {
+        window.location.href = "{% url 'home' %}";
+    }, 1500);
+</script>
+
+{% else %}
+<div class="registration-wrapper">
+
+    <a href="{% url 'home' %}" class="back-home-btn">
+        <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+
+    <div class="glass-card">
+        <div class="text-center mb-5">
+            <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle mb-3" style="width: 80px; height: 80px;">
+                <i class="fas fa-shopping-basket fa-2x"></i>
+            </div>
+            <h2 class="fw-bold" style="font-size: 2.2rem; letter-spacing: -1px;">Join as a Consumer</h2>
+            <p class="text-muted fw-medium">Create your buyer profile to purchase fresh crops directly from farmers.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="registrationForm">
+            {% csrf_token %}
+
+            <div class="form-section-title"><i class="fas fa-user-shield"></i> 1. Account Credentials</div>
+            <div class="row g-4 mb-5">
+                {% for field in user_form %}
+                <div class="col-md-6 position-relative">
+                    <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+
+                    {% if field.name == 'first_name' or field.name == 'last_name' %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}" pattern="[A-Za-z]+" title="Only letters are allowed. No spaces or numbers." oninput="let v=this.value; this.value=v.replace(/[^A-Za-z]/g, ''); if(v!==this.value) showToast('Names can only contain letters. No spaces or numbers allowed.');">
+
+                    {% elif field.name == 'email' %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="e.g. yourname@gmail.com" required value="{{ field.value|default_if_none:'' }}" pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="You must provide a valid @gmail.com address.">
+
+                    {% elif 'password' in field.name %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}" oninput="let v=this.value; this.value=v.replace(/\s/g, ''); if(v!==this.value) showToast('Spaces are not allowed in passwords.');" title="Spaces are not allowed in passwords.">
+
+                    {% else %}
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control-custom" placeholder="Enter your {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}">
+                    {% endif %}
+
+                    {% if field.name == 'username' %}
+                        <div id="username-feedback" class="live-feedback"></div>
+                    {% endif %}
+
+                    {% if field.errors %}
+                    <div class="text-danger small mt-2 fw-bold"><i class="fas fa-exclamation-circle"></i> {{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-section-title"><i class="fas fa-address-card"></i> 2. Personal Details</div>
+            <div class="row g-4 mb-4">
+                {% for field in profile_form %}
+
+                {% if field.name != 'id_proof' and field.name != 'area' %}
+
+                    {% if field.name == 'profile_photo' %}
+                    <div class="col-md-12">
+                        <label class="form-label">Profile Avatar <span class="text-danger fs-6">*</span></label>
+                        <div class="file-upload-wrapper">
+                            <img id="profile-preview-box" src="" alt="Profile Preview">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-warning mb-3" id="upload-icon"></i>
+                            <h5 class="fw-bold mb-1" id="upload-text">Click or drag photo here</h5>
+                            <small class="text-muted">JPG, PNG format only</small>
+                            <input type="file" name="{{ field.name }}" id="profileInput" accept="image/*" required onchange="previewImage(this)">
+                        </div>
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+
+                    {% elif field.name == 'address' %}
+                    <div class="col-md-6 position-relative">
+                        <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+                        <input type="text" name="{{ field.name }}" id="addressInput" class="form-control-custom" placeholder="Start typing address..." required autocomplete="off" value="{{ field.value|default_if_none:'' }}">
+                        <ul class="list-group position-absolute w-100 shadow-sm d-none" id="addressSuggestions" style="z-index: 1050; top: 100%; max-height: 200px; overflow-y: auto; border-radius: 14px;"></ul>
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+
+                    {% elif field.name == 'state' %}
+                    <div class="col-md-6 position-relative">
+                        <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+                        <input type="text" name="{{ field.name }}" id="stateInput" class="form-control-custom" placeholder="Start typing state name..." required autocomplete="off" value="{{ field.value|default_if_none:'' }}">
+                        <ul class="list-group position-absolute w-100 shadow-sm d-none" id="stateSuggestions" style="z-index: 1050; top: 100%; max-height: 200px; overflow-y: auto; border-radius: 14px;"></ul>
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+
+                    {% elif field.name == 'phone_number' or field.name == 'phone_no' %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+                        <input type="tel" name="{{ field.name }}" class="form-control-custom" placeholder="Enter 10-digit number..." required value="{{ field.value|default_if_none:'' }}" maxlength="10" minlength="10" pattern="[0-9]{10}" title="Phone number must be exactly 10 digits." oninput="let v=this.value; this.value=v.replace(/[^0-9]/g, ''); if(v!==this.value) showToast('Phone numbers can only contain numbers.');">
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+
+                    {% else %}
+                    <div class="col-md-6">
+                        <label class="form-label">{{ field.label }} <span class="text-danger fs-6">*</span></label>
+                        <input type="text" name="{{ field.name }}" class="form-control-custom" placeholder="Enter {{ field.label|lower }}..." required value="{{ field.value|default_if_none:'' }}">
+                        {% if field.errors %}<div class="text-danger small mt-2 fw-bold">{{ field.errors }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-register mt-4">
+                <i class="fas fa-check-circle me-2"></i> Create Consumer Account
+            </button>
+
+            <div class="text-center mt-4">
+                <span class="text-muted fw-bold small"><i class="fas fa-lock text-warning me-1"></i> Your data is securely encrypted.</span>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // === CUSTOM POPUP TOAST FUNCTION ===
+    function showToast(message, type = 'error') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+
+        let icon = type === 'error' ? '<i class="fas fa-exclamation-circle text-danger fs-4"></i>' : '<i class="fas fa-check-circle text-warning fs-4"></i>';
+        let borderColor = type === 'error' ? '#ef4444' : '#F59E0B'; // Mapped to Amber theme
+
+        toast.style.borderLeftColor = borderColor;
+        toast.innerHTML = `${icon} <span>${message}</span>`;
+
+        container.appendChild(toast);
+
+        // Remove after 3.5 seconds
+        setTimeout(() => {
+            toast.classList.add('toast-fade-out');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // === HIJACK FORM SUBMIT TO SHOW CUSTOM POPUPS INSTEAD OF BORING BROWSER ALERTS ===
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('registrationForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault(); // Stops the default browser tooltip
+
+                // Identify the field name nicely
+                let fieldName = this.previousElementSibling ? this.previousElementSibling.innerText.replace('*', '').trim() : "This field";
+                let errorMessage = `Please fill out ${fieldName} correctly.`;
+
+                // Custom logic based on error type
+                if (this.validity.valueMissing) {
+                    errorMessage = `${fieldName} is required.`;
+                } else if (this.validity.patternMismatch) {
+                    errorMessage = this.title || `Invalid format for ${fieldName}.`;
+                } else if (this.validity.tooShort || this.validity.tooLong) {
+                    errorMessage = `${fieldName} must be exactly ${this.getAttribute('minlength')} digits.`;
+                }
+
+                showToast(errorMessage);
+
+                // Add a red glow to the invalid field temporarily
+                this.style.borderColor = '#ef4444';
+                setTimeout(() => { this.style.borderColor = ''; }, 3000);
+            });
+        });
+    });
+
+    // === PASSWORD MATCH VALIDATION ===
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('registrationForm');
+
+        if(form) {
+            const passwordInputs = form.querySelectorAll('input[type="password"]');
+
+            if(passwordInputs.length >= 2) {
+                const pass1 = passwordInputs[0];
+                const pass2 = passwordInputs[1];
+
+                pass2.addEventListener('input', function() {
+                    let errorMsg = document.getElementById('password-match-error');
+                    if (pass1.value !== this.value) {
+                        this.style.borderColor = '#ef4444';
+                        if (!errorMsg) {
+                            errorMsg = document.createElement('div');
+                            errorMsg.id = 'password-match-error';
+                            errorMsg.className = 'text-danger small mt-2 fw-bold live-feedback';
+                            errorMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Passwords do not match!';
+                            this.parentNode.appendChild(errorMsg);
+                        }
+                    } else {
+                        this.style.borderColor = '#F59E0B';
+                        if (errorMsg) errorMsg.remove();
+                    }
+                });
+
+                form.addEventListener('submit', function(e) {
+                    if (pass1.value !== pass2.value) {
+                        e.preventDefault();
+                        pass2.style.borderColor = '#ef4444';
+                        pass2.focus();
+
+                        showToast("Passwords do not match!");
+
+                        let errorMsg = document.getElementById('password-match-error');
+                        if (!errorMsg) {
+                            errorMsg = document.createElement('div');
+                            errorMsg.id = 'password-match-error';
+                            errorMsg.className = 'text-danger small mt-2 fw-bold live-feedback';
+                            errorMsg.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Passwords do not match!';
+                            pass2.parentNode.appendChild(errorMsg);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // === LIVE USERNAME AVAILABILITY CHECKER ===
+    document.addEventListener("DOMContentLoaded", function() {
+        const usernameInput = document.getElementById('id_username');
+        const feedbackDiv = document.getElementById('username-feedback');
+
+        if (usernameInput) {
+            let debounceTimer;
+            usernameInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                const username = this.value.trim();
+
+                if (username.length === 0) {
+                    feedbackDiv.innerHTML = '';
+                    usernameInput.style.borderColor = '';
+                    return;
+                }
+
+                feedbackDiv.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin me-1"></i> Checking availability...</span>';
+
+                debounceTimer = setTimeout(() => {
+                    fetch(`/check-username/?username=${encodeURIComponent(username)}`)
+                        .then(response => {
+                            if(!response.ok) throw new Error("Endpoint not found yet");
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.is_taken) {
+                                feedbackDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle me-1"></i> Username already taken</span>';
+                                usernameInput.style.borderColor = '#ef4444';
+                            } else {
+                                feedbackDiv.innerHTML = '<span class="text-success"><i class="fas fa-check-circle me-1"></i> Username available</span>';
+                                usernameInput.style.borderColor = '#F59E0B';
+                            }
+                        })
+                        .catch(err => {
+                            feedbackDiv.innerHTML = '';
+                        });
+                }, 600);
+            });
+        }
+    });
+
+    // === PROFILE IMAGE PREVIEW ===
+    function previewImage(input) {
+        const previewBox = document.getElementById('profile-preview-box');
+        const uploadIcon = document.getElementById('upload-icon');
+        const uploadText = document.getElementById('upload-text');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                previewBox.src = e.target.result;
+                previewBox.style.display = 'block';
+                uploadIcon.style.display = 'none';
+                uploadText.innerHTML = '<span class="text-warning"><i class="fas fa-check-circle"></i> Photo Selected</span>';
+            }
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // === EXPANDED SMART DEPENDENT AUTOCOMPLETE ===
+    const indianStates = [
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+        "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+        "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+        "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+        "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+        "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli",
+        "Daman and Diu", "Delhi", "Lakshadweep", "Puducherry"
+    ];
+
+    const addressOptions = [
+        "M.G. Road", "Marine Drive", "Edappally", "Kaloor", "Kakkanad", "Palarivattom",
+        "Fort Kochi", "Willingdon Island", "Thampanoor", "East Fort", "Kowdiar",
+        "Kazhakootam", "Kovalam", "Vazhuthacaud", "SM Street", "Mananchira",
+        "Mavoor Road", "Thalayolaparambu Main Road", "Vaikom Temple Road",
+        "Pala Town", "Ettumanoor Junction"
+    ];
+
+    const stateInput = document.getElementById('stateInput');
+    const stateSuggestions = document.getElementById('stateSuggestions');
+    const addressInput = document.getElementById('addressInput');
+    const addressSuggestions = document.getElementById('addressSuggestions');
+
+    function setupDependentAutocomplete(inputEl, suggestionsEl, getDataArrayCallback) {
+        if (!inputEl || !suggestionsEl) return;
+
+        inputEl.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            suggestionsEl.innerHTML = '';
+
+            if (val) {
+                const dataArray = getDataArrayCallback();
+                const matches = dataArray.filter(item => item.toLowerCase().startsWith(val));
+
+                if (matches.length > 0) {
+                    suggestionsEl.classList.remove('d-none');
+                    matches.forEach(match => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item list-group-item-action fw-bold text-muted border-0 border-bottom p-3';
+                        li.style.cursor = 'pointer';
+
+                        const regex = new RegExp(`^(${val})`, "gi");
+                        li.innerHTML = match.replace(regex, "<span class='text-warning'>$1</span>");
+
+                        li.addEventListener('click', function() {
+                            inputEl.value = match;
+                            suggestionsEl.classList.add('d-none');
+                        });
+                        suggestionsEl.appendChild(li);
+                    });
+                } else {
+                    suggestionsEl.classList.add('d-none');
+                }
+            } else {
+                suggestionsEl.classList.add('d-none');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target !== inputEl && e.target !== suggestionsEl) {
+                suggestionsEl.classList.add('d-none');
+            }
+        });
+    }
+
+    setupDependentAutocomplete(stateInput, stateSuggestions, () => indianStates);
+    setupDependentAutocomplete(addressInput, addressSuggestions, () => addressOptions);
+
+</script>
+{% endif %}
+{% endblock %}

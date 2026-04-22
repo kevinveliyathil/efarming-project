@@ -1,0 +1,163 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    body { background-color: #f9fafb; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .orders-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #f3f4f6;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        margin-bottom: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+
+    .order-header {
+        background: #f8f9fa;
+        padding: 15px 25px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .order-body {
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .crop-img {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        object-fit: cover;
+        background-color: #f3f4f6;
+    }
+
+    /* Status Badge Styles */
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .status-Pending { background: #FFF7ED; color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-Packed { background: #EFF6FF; color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .status-Shipped { background: #EEF2FF; color: #6366F1; border: 1px solid rgba(99, 102, 241, 0.2); }
+    .status-Delivered { background: #ECFDF5; color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    .btn-track {
+        background: white;
+        color: #111827;
+        border: 1px solid #E5E7EB;
+        font-weight: 600;
+        padding: 8px 20px;
+        border-radius: 8px;
+        transition: 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-track:hover {
+        background: #F9FAFB;
+        border-color: #D1D5DB;
+        color: #000;
+    }
+</style>
+
+<div class="orders-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">My Orders</h2>
+        <span class="text-muted small">{{ orders.count }} items found</span>
+    </div>
+
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <div>
+                <span class="text-muted small fw-bold text-uppercase me-2">Order Placed</span>
+                <span class="fw-bold text-dark">{{ order.date_ordered|date:"F d, Y" }}</span>
+            </div>
+            <div>
+                <span class="text-muted small fw-bold text-uppercase me-2">Order ID</span>
+                <span class="text-dark">#ORD-{{ order.id }}</span>
+            </div>
+        </div>
+
+        <div class="order-body">
+            {% if order.crop.image %}
+                <img src="{{ order.crop.image.url }}" alt="{{ order.crop.name }}" class="crop-img">
+            {% else %}
+                <div class="crop-img d-flex align-items-center justify-content-center text-muted">
+                    <i class="fas fa-leaf fa-2x opacity-50"></i>
+                </div>
+            {% endif %}
+
+            <div class="flex-grow-1">
+                <h5 class="fw-bold mb-1">{{ order.crop.name }}</h5>
+                <p class="text-muted small mb-0">
+                    Quantity: <span class="fw-bold text-dark">{{ order.quantity }} kg</span>
+                    &nbsp;|&nbsp;
+                    Seller: {{ order.crop.farmer.user.first_name }}
+                </p>
+                <h5 class="text-success fw-bold mt-2">₹{{ order.total_price }}</h5>
+            </div>
+
+            <div class="text-end" style="min-width: 140px;">
+                <div class="mb-3">
+                    <span class="status-badge status-{{ order.status }}">
+                        {% if order.status == 'Pending' %}<i class="far fa-clock me-1"></i>
+                        {% elif order.status == 'Packed' %}<i class="fas fa-box me-1"></i>
+                        {% elif order.status == 'Shipped' %}<i class="fas fa-truck me-1"></i>
+                        {% elif order.status == 'Delivered' %}<i class="fas fa-check me-1"></i>
+                        {% endif %}
+                        {{ order.status }}
+                    </span>
+                </div>
+
+                <a href="{% url 'track_order' order.id %}" class="btn-track">
+                    Track Order <i class="fas fa-chevron-right small"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <div style="width: 80px; height: 80px; background: #F3F4F6; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fas fa-shopping-basket fa-2x text-muted"></i>
+            </div>
+        </div>
+        <h4 class="fw-bold text-dark">No orders yet</h4>
+        <p class="text-muted">Looks like you haven't bought any fresh crops yet.</p>
+        <a href="{% url 'crop_list' %}" class="btn btn-success fw-bold px-4 py-2 mt-2 rounded-pill">
+            Start Shopping
+        </a>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

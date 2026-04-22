@@ -1,0 +1,376 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #0F766E 0%, #10B981 100%);
+        --glass-bg: rgba(255, 255, 255, 0.95);
+        --body-bg: #F3F4F6;
+        --text-main: #1F2937;
+        --border-color: #E5E7EB;
+        --focus-ring: rgba(16, 185, 129, 0.25);
+    }
+
+    body {
+        background-color: var(--body-bg);
+        font-family: 'Manrope', sans-serif;
+    }
+
+    /* === 1. HERO HEADER === */
+    .edit-header {
+        background: var(--primary-gradient);
+        height: 280px;
+        padding-top: 50px;
+        border-radius: 0 0 40px 40px;
+        position: relative;
+        color: white;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    /* NEW: Back Button Style */
+    .back-btn-top {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        z-index: 50;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn-top:hover {
+        background: rgba(255, 255, 255, 0.4);
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    .circle-shape {
+        position: absolute;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    .c1 { width: 300px; height: 300px; top: -100px; left: -50px; }
+    .c2 { width: 200px; height: 200px; bottom: -50px; right: 10%; }
+
+    /* === 2. MAIN LAYOUT === */
+    .edit-content {
+        margin-top: -120px;
+        padding-bottom: 60px;
+        position: relative;
+        z-index: 10;
+        max-width: 850px;
+    }
+
+    /* === 3. GLASS CARD === */
+    .settings-card {
+        background: var(--glass-bg);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.6);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        padding: 40px;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* === 4. PROFILE AVATAR === */
+    .profile-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        width: 110px; height: 110px;
+        margin: 0 auto 15px;
+        cursor: pointer;
+    }
+
+    .profile-img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .profile-initial {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        background: white;
+        color: #10B981;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3rem; font-weight: 800;
+        border: 4px solid white;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .avatar-edit-icon {
+        position: absolute;
+        bottom: 5px; right: 0;
+        background: #1F2937;
+        color: white;
+        width: 35px; height: 35px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.9rem;
+        border: 3px solid white;
+        transition: 0.2s;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .avatar-wrapper:hover .avatar-edit-icon {
+        transform: scale(1.1);
+        background: #10B981;
+    }
+
+    /* === 5. TABS === */
+    .settings-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 35px;
+        border-bottom: 1px solid #E5E7EB;
+        padding-bottom: 20px;
+    }
+
+    .tab-btn {
+        background: transparent;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 700;
+        color: #6B7280;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    .tab-btn.active {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: #F3F4F6;
+        color: #374151;
+    }
+
+    /* === 6. FORMS === */
+    .form-label {
+        font-weight: 700;
+        color: #374151;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background-color: #F9FAFB;
+        font-size: 0.95rem;
+        transition: 0.3s;
+        color: var(--text-main);
+    }
+
+    .form-control-custom:focus {
+        outline: none;
+        border-color: #10B981;
+        background-color: white;
+        box-shadow: 0 0 0 4px var(--focus-ring);
+    }
+
+    .action-buttons {
+        margin-top: 40px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        border-top: 1px solid #E5E7EB;
+        padding-top: 25px;
+    }
+
+    .btn-save {
+        background: var(--primary-gradient);
+        color: white; border: none;
+        padding: 12px 30px; border-radius: 50px;
+        font-weight: 700; cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-save:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3); }
+
+    .btn-cancel {
+        background: white; color: #6B7280;
+        border: 1px solid #E5E7EB;
+        padding: 12px 25px; border-radius: 50px;
+        font-weight: 600; text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-cancel:hover { background: #F9FAFB; color: #1F2937; }
+
+    .security-box {
+        background: #F9FAFB;
+        border: 1px solid #E5E7EB;
+        border-radius: 16px;
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .tab-content { display: none; animation: fadeIn 0.4s ease; }
+    .tab-content.active { display: block; }
+
+</style>
+
+<div class="edit-header">
+    <a href="{% url 'customer_dashboard' %}" class="back-btn-top">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="circle-shape c1"></div>
+    <div class="circle-shape c2"></div>
+    <div class="container position-relative z-2 animate__animated animate__fadeInDown">
+        <h2 class="fw-bold mb-2">Account Settings</h2>
+        <p class="opacity-90">Manage your profile details and security.</p>
+    </div>
+</div>
+
+<div class="container edit-content">
+    <div class="settings-card">
+
+        <div class="profile-section">
+            <div class="avatar-wrapper" onclick="document.getElementById('id_profile_photo').click()">
+                {% if user.customerprofile.profile_photo %}
+                    <img src="{{ user.customerprofile.profile_photo.url }}" class="profile-img" id="avatarPreview">
+                {% else %}
+                    <div class="profile-initial" id="avatarInitial">{{ user.first_name|slice:":1" }}</div>
+                    <img src="" class="profile-img d-none" id="avatarPreviewHidden">
+                {% endif %}
+
+                <div class="avatar-edit-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ user.get_full_name }}</h3>
+            <p class="text-muted small">{{ user.email }}</p>
+        </div>
+
+        <div class="settings-tabs">
+            <button class="tab-btn active" onclick="switchTab('account')">
+                <i class="fas fa-user-circle"></i> Personal Info
+            </button>
+            <button class="tab-btn" onclick="switchTab('security')">
+                <i class="fas fa-shield-alt"></i> Security
+            </button>
+        </div>
+
+        <div id="account" class="tab-content active">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="d-none">{{ p_form.profile_photo }}</div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label">First Name</label>
+                        {{ u_form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Last Name</label>
+                        {{ u_form.last_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address</label>
+                        {{ u_form.email }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Username</label>
+                        {{ u_form.username }}
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="{% url 'customer_dashboard' %}" class="btn-cancel">Cancel</a>
+                    <button type="submit" class="btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="security" class="tab-content">
+            <h5 class="fw-bold mb-3 text-dark">Login & Security</h5>
+            <p class="text-muted mb-4 small">Manage your password to keep your account safe.</p>
+
+            <div class="security-box">
+                <div>
+                    <h6 class="fw-bold mb-1 text-dark">Password</h6>
+                    <p class="mb-0 text-muted small">It's a good idea to use a strong password.</p>
+                </div>
+                <a href="{% url 'password_change' %}" class="btn-save text-decoration-none" style="background: #374151; padding: 10px 20px; font-size: 0.9rem;">
+                    Change Password
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        event.currentTarget.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var inputs = document.querySelectorAll('input[type="text"], input[type="email"], select, textarea');
+        inputs.forEach(function(input) {
+            input.classList.add('form-control-custom');
+        });
+
+        const fileInput = document.getElementById('id_profile_photo');
+        const preview = document.getElementById('avatarPreview');
+        const previewHidden = document.getElementById('avatarPreviewHidden');
+        const initialDiv = document.getElementById('avatarInitial');
+
+        if(fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if(preview) {
+                            preview.src = e.target.result;
+                        } else if(initialDiv && previewHidden) {
+                            initialDiv.style.display = 'none';
+                            previewHidden.src = e.target.result;
+                            previewHidden.classList.remove('d-none');
+                            previewHidden.style.display = 'block';
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

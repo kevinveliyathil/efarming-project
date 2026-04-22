@@ -1,0 +1,74 @@
+{% extends 'main_app/base.html' %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card"></i> Secure Checkout</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="alert alert-secondary">
+                        <h5>Item: {{ crop.name }}</h5>
+                        <p class="mb-0">Price: ₹<span id="pricePerKg">{{ crop.price_per_kg }}</span> / kg</p>
+                        <p class="mb-0 text-muted small">Available Stock: {{ crop.quantity_kg }} kg</p>
+                    </div>
+
+                    <form action="{% url 'confirm_payment' crop.id %}" method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Quantity (kg)</label>
+                            <input type="number" name="quantity" id="quantityInput" class="form-control form-control-lg" 
+                                   value="1" min="1" max="{{ crop.quantity_kg }}" step="0.5" required oninput="updateTotal()">
+                            <small class="text-muted">Enter amount to buy.</small>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" placeholder="Name on Card" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Card Number</label>
+                            <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="16" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Expiry</label>
+                                <input type="text" class="form-control" placeholder="MM/YY" required>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="password" class="form-control" placeholder="123" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 btn-lg">
+                            Pay ₹<span id="totalBtn">{{ crop.price_per_kg }}</span> & Place Order
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateTotal() {
+        let price = parseFloat(document.getElementById('pricePerKg').innerText);
+        let qty = parseFloat(document.getElementById('quantityInput').value);
+        
+        if (isNaN(qty) || qty < 0) { qty = 0; }
+        
+        let total = (price * qty).toFixed(2); // Calculate total
+        document.getElementById('totalBtn').innerText = total;
+    }
+</script>
+{% endblock %}

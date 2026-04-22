@@ -1,0 +1,318 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+    /* === LIVE ANIMATED BACKGROUND === */
+    .live-bg {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        background: linear-gradient(135deg, #e0f2f1, #e8f5e9, #f0fdf4, #dcfce7);
+        background-size: 300% 300%;
+        animation: gradientBG 12s ease infinite;
+        z-index: -1;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    body {
+        font-family: 'Manrope', sans-serif;
+        margin: 0;
+        min-height: 100vh;
+    }
+
+    /* === RECEIPT CARD STYLING === */
+    .receipt-container {
+        max-width: 700px;
+        margin: 50px auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    .receipt-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+        overflow: hidden;
+        position: relative;
+        border: 1px solid rgba(255,255,255,0.8);
+    }
+
+    /* Decorative Header */
+    .receipt-header {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        padding: 40px 30px;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Decorative shine effect on header */
+    .receipt-header::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shine 3s infinite;
+    }
+    @keyframes shine {
+        0% { left: -100%; }
+        20% { left: 200%; }
+        100% { left: 200%; }
+    }
+
+    /* Success Icon Animation */
+    .success-icon-box {
+        width: 80px;
+        height: 80px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        backdrop-filter: blur(5px);
+        animation: bounceIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1.2);
+    }
+    .success-icon-box i { font-size: 2.5rem; color: white; animation: checkmarkPop 0.5s 0.5s ease backwards; opacity: 0; transform: scale(0); }
+    @keyframes checkmarkPop { to { opacity: 1; transform: scale(1); } }
+
+    /* Order Details Bar */
+    .order-meta-bar {
+        background: #f8f9fa;
+        padding: 15px 30px;
+        border-bottom: 2px dashed #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .receipt-body { padding: 40px 30px; }
+
+    /* TABLE STYLES */
+    .item-table { width: 100%; border-collapse: separate; border-spacing: 0 15px; }
+    .item-table th {
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #94a3b8;
+        font-weight: 800;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Product Row Styling */
+    .item-row td { vertical-align: middle; padding: 10px 0; }
+
+    .product-info { display: flex; align-items: center; gap: 15px; }
+
+    .product-img {
+        width: 50px; height: 50px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .product-placeholder {
+        width: 50px; height: 50px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        display: flex; align-items: center; justify-content: center;
+        color: #94a3b8;
+    }
+
+    .product-name { font-weight: 800; color: #1e293b; display: block; line-height: 1.2; font-size: 1.05rem; }
+    .seller-name { font-size: 0.75rem; color: #64748b; font-weight: 600; }
+
+    /* Total Section */
+    .total-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f1f5f9;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .grand-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #cbd5e1;
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #059669;
+    }
+
+    /* Buttons */
+    .action-bar {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 20px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-custom {
+        flex: 1;
+        padding: 14px;
+        border-radius: 12px;
+        font-weight: 800;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-print { background: #e2e8f0; color: #475569; }
+    .btn-print:hover { background: #cbd5e1; color: #1e293b; }
+
+    .btn-home { background: #1e293b; color: white; box-shadow: 0 4px 10px rgba(30, 41, 59, 0.3); }
+    .btn-home:hover { background: #0f172a; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(30, 41, 59, 0.4); color: white; }
+
+    /* Print Optimization */
+    @media print {
+        body * { visibility: hidden; }
+        .receipt-container, .receipt-container * { visibility: visible; }
+        .receipt-container { position: absolute; left: 0; top: 0; width: 100%; margin: 0; box-shadow: none; animation: none !important; }
+        .no-print, .action-bar { display: none !important; }
+        .receipt-card { border: 1px solid #eee; box-shadow: none; }
+        .live-bg { display: none; }
+    }
+
+    @keyframes bounceIn {
+        0% { transform: scale(0); opacity: 0; }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+</style>
+
+<div class="live-bg"></div>
+
+<div class="container receipt-container animate__animated animate__fadeInUp">
+    <div class="receipt-card">
+
+        <div id="invoice-content">
+            <div class="receipt-header">
+                <div class="success-icon-box">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="fw-bold mb-1" style="font-family: 'Playfair Display', serif; font-size: 2.2rem;">Payment Successful!</h2>
+                <p class="mb-0 opacity-75 font-monospace">Transaction Confirmed</p>
+            </div>
+
+            <div class="order-meta-bar">
+                <span>Date: {{ date|date:"M d, Y" }}</span>
+                <span>Invoice #INV-{{ date|date:"U" }}</span>
+            </div>
+
+            <div class="receipt-body">
+
+                <div class="row mb-4 pb-4 border-bottom">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <h6 class="text-uppercase text-muted small fw-bold mb-2" style="letter-spacing: 1px;">Billed To</h6>
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.2rem;">{{ customer.user.first_name }} {{ customer.user.last_name }}</h5>
+                        <p class="text-muted mb-0 small fw-bold mt-1"><i class="fas fa-phone-alt me-1"></i> {{ customer.phone_number }}</p>
+                        <p class="text-muted mb-0 small fw-bold mt-1"><i class="fas fa-map-marker-alt me-1"></i> {{ customer.address }}</p>
+                    </div>
+
+                    <div class="col-md-6 text-md-end">
+                        <h6 class="text-uppercase text-muted small fw-bold mb-2" style="letter-spacing: 1px;">Sold By (Farmer)</h6>
+                        <h5 class="fw-bold text-dark mb-0" style="font-size: 1.2rem;">{{ orders.0.farmer.user.first_name }} {{ orders.0.farmer.user.last_name }}</h5>
+                        <p class="text-muted mb-0 small fw-bold mt-1"><i class="fas fa-phone-alt me-1"></i> {{ orders.0.farmer.phone_no|default:"Not Provided" }}</p>
+                        <p class="text-muted mb-0 small fw-bold mt-1"><i class="fas fa-map-marker-alt me-1"></i> {{ orders.0.farmer.area|default:"Kerala, India" }}</p>
+                    </div>
+                </div>
+
+                <table class="item-table">
+                    <thead>
+                        <tr>
+                            <th width="50%">Item Description</th>
+                            <th width="20%" class="text-center">Qty</th>
+                            <th width="30%" class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="item-row animate__animated animate__fadeInLeft" style="animation-delay: {{ forloop.counter0 }}00ms;">
+                            <td>
+                                <div class="product-info">
+                                    {% if order.crop.image %}
+                                        <img src="{{ order.crop.image.url }}" class="product-img">
+                                    {% else %}
+                                        <div class="product-placeholder"><i class="fas fa-leaf"></i></div>
+                                    {% endif %}
+                                    <div>
+                                        <span class="product-name">{{ order.crop.name }}</span>
+                                        <span class="seller-name"><i class="fas fa-seedling me-1"></i>Fresh Harvest</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center fw-bold text-muted">{{ order.quantity|floatformat:1 }} kg</td>
+                            <td class="text-end fw-bold text-dark">₹{{ order.total_price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ grand_total }}</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Tax (0%)</span>
+                        <span>₹0.00</span>
+                    </div>
+                    <div class="grand-total">
+                        <span>Total Paid</span>
+                        <span>₹{{ grand_total }}</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="action-bar no-print">
+            <button onclick="window.print()" class="btn-custom btn-print">
+                <i class="fas fa-print me-2"></i> Print
+            </button>
+            <a href="{% url 'home' %}" class="btn-custom btn-home">
+                Done <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4 text-muted small no-print fw-bold">
+        <i class="fas fa-lock me-1 text-success"></i> 256-bit Secure eFarming Transaction
+    </div>
+</div>
+
+{% endblock %}

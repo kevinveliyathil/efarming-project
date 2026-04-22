@@ -1,0 +1,223 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body { background-color: #f3f4f6; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    .track-wrapper {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+
+    .track-card {
+        background: white;
+        width: 100%;
+        max-width: 900px;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Green decorative bar at top */
+    .track-card::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+        background: linear-gradient(90deg, #10B981, #059669);
+    }
+
+    /* === TIMELINE STYLES === */
+    .timeline-container {
+        position: relative;
+        margin: 50px 0;
+        padding: 0 20px;
+    }
+
+    .timeline-bar {
+        position: absolute;
+        top: 25px; /* Centers line behind icons */
+        left: 50px;
+        right: 50px;
+        height: 4px;
+        background: #E5E7EB;
+        z-index: 1;
+        border-radius: 4px;
+    }
+
+    /* The green progress fill */
+    .timeline-progress {
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        height: 4px;
+        background: #10B981;
+        z-index: 2;
+        border-radius: 4px;
+        transition: width 1s ease-in-out;
+        width: 0%; /* JS or Logic will set this */
+    }
+
+    .steps-wrapper {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 3;
+    }
+
+    .step-item {
+        text-align: center;
+        width: 100px;
+    }
+
+    .step-icon-box {
+        width: 54px;
+        height: 54px;
+        background: white;
+        border: 3px solid #E5E7EB;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: #9CA3AF;
+        font-size: 1.2rem;
+        transition: 0.3s;
+        position: relative;
+    }
+
+    .step-item.active .step-icon-box {
+        border-color: #10B981;
+        background: #ECFDF5;
+        color: #10B981;
+        box-shadow: 0 0 0 5px rgba(16, 185, 129, 0.1);
+    }
+
+    .step-item.completed .step-icon-box {
+        border-color: #10B981;
+        background: #10B981;
+        color: white;
+    }
+
+    .step-title { font-weight: 700; color: #374151; font-size: 0.95rem; margin-bottom: 4px; }
+    .step-desc { font-size: 0.75rem; color: #9CA3AF; }
+
+    /* Order Summary Box */
+    .order-summary {
+        background: #F9FAFB;
+        border-radius: 16px;
+        padding: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .summary-item label { display: block; font-size: 0.75rem; color: #6B7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 700; }
+    .summary-item h5 { margin: 0; font-weight: 800; color: #111827; }
+</style>
+
+<div class="track-wrapper">
+    <div class="track-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-1">Track Order</h2>
+                <p class="text-muted mb-0">Order ID: <span class="text-dark fw-bold">#ORD-{{ order.id }}</span></p>
+            </div>
+            <a href="{% url 'home' %}" class="btn btn-outline-dark rounded-pill px-4 fw-bold">
+                <i class="fas fa-arrow-left me-2"></i> Back to Home
+            </a>
+        </div>
+
+        <div class="order-summary mb-5">
+            <div class="summary-item">
+                <label>Estimated Delivery</label>
+                <h5 class="text-success">
+                    {% if order.status == 'Delivered' %}Delivered{% else %}Tomorrow, by 6 PM{% endif %}
+                </h5>
+            </div>
+            <div class="summary-item">
+                <label>Shipping To</label>
+                <h5>{{ order.customer.user.first_name }}</h5>
+            </div>
+            <div class="summary-item">
+                <label>Product</label>
+                <h5>{{ order.crop.name }} ({{ order.quantity }}kg)</h5>
+            </div>
+            <div class="summary-item">
+                <label>Tracking Number</label>
+                <h5 style="letter-spacing: 1px;">TRK-9821-{{ order.id }}</h5>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-bar"></div>
+            <div class="timeline-progress" style="width:
+                {% if order.status == 'Pending' %}0%
+                {% elif order.status == 'Packed' %}33%
+                {% elif order.status == 'Shipped' %}66%
+                {% elif order.status == 'Delivered' %}100%{% endif %};">
+            </div>
+
+            <div class="steps-wrapper">
+
+                <div class="step-item {% if order.status == 'Pending' %}active{% elif order.status != 'Pending' %}completed{% endif %}">
+                    <div class="step-icon-box">
+                        {% if order.status != 'Pending' %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-file-invoice"></i>{% endif %}
+                    </div>
+                    <div class="step-title">Order Placed</div>
+                    <div class="step-desc">{{ order.date_ordered|date:"M d, H:i" }}</div>
+                </div>
+
+                <div class="step-item
+                    {% if order.status == 'Packed' %}active
+                    {% elif order.status == 'Shipped' or order.status == 'Delivered' %}completed{% endif %}">
+                    <div class="step-icon-box">
+                        {% if order.status == 'Shipped' or order.status == 'Delivered' %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-box-open"></i>{% endif %}
+                    </div>
+                    <div class="step-title">Packed</div>
+                    <div class="step-desc">Ready for shipping</div>
+                </div>
+
+                <div class="step-item
+                    {% if order.status == 'Shipped' %}active
+                    {% elif order.status == 'Delivered' %}completed{% endif %}">
+                    <div class="step-icon-box">
+                        {% if order.status == 'Delivered' %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-truck"></i>{% endif %}
+                    </div>
+                    <div class="step-title">On the Way</div>
+                    <div class="step-desc">Out for delivery</div>
+                </div>
+
+                <div class="step-item {% if order.status == 'Delivered' %}completed active{% endif %}">
+                    <div class="step-icon-box"><i class="fas fa-home"></i></div>
+                    <div class="step-title">Delivered</div>
+                    <div class="step-desc">Enjoy your item!</div>
+                </div>
+
+            </div>
+        </div>
+        {% if order.status == 'Delivered' %}
+        <div class="alert alert-success d-flex align-items-center border-0 rounded-4 mt-5 p-3" role="alert">
+            <i class="fas fa-check-circle fa-2x me-3"></i>
+            <div>
+                <h6 class="fw-bold mb-0">Order Completed</h6>
+                <p class="mb-0 small">This order was delivered successfully. <a href="#" class="fw-bold text-success">Write a Review</a></p>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center mt-5">
+            <p class="text-muted small">Need help with your order? <a href="#" class="text-dark fw-bold">Contact Support</a></p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
